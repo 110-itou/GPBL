@@ -120,7 +120,7 @@ export const dummyCalendarEvents = [
   {
     id: 1,
     title: '山田鉄工 - 鋼板納入',
-    date: '2024-05-13',
+    date: '2024-05-10',
     startTime: '09:00',
     endTime: '10:00',
     location: 'A',
@@ -130,7 +130,7 @@ export const dummyCalendarEvents = [
   {
     id: 2,
     title: '佐藤金属 - 配管納入',
-    date: '2024-05-13',
+    date: '2024-05-11',
     startTime: '10:30',
     endTime: '11:30',
     location: 'B',
@@ -155,12 +155,12 @@ export const dummyCalendarEvents = [
     endTime: '09:00',
     location: 'D',
     type: 'delivery',
-    status: 'completed'
+    status: 'scheduled'
   },
   {
     id: 5,
     title: '伊藤機械 - モーター納入',
-    date: '2024-05-14',
+    date: '2024-05-18',
     startTime: '11:00',
     endTime: '12:00',
     location: 'E',

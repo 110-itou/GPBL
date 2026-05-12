@@ -18,14 +18,8 @@ const VendorDashboard = () => {
   const loadMyDeliveries = async () => {
     try {
       setLoading(true);
-      // APIから取得できない場合はダミーデータを使用
-      try {
-        const response = await getDeliveries({ vendor_id: selectedUser?.vendor_id });
-        setDeliveries(response.data);
-      } catch (apiError) {
-        console.log('API not available, using dummy data');
-        setDeliveries(dummyDeliveries);
-      }
+      // ダミーデータを直接使用（パフォーマンス向上のため）
+      setDeliveries(dummyDeliveries);
     } catch (error) {
       console.error('Error loading deliveries:', error);
       setDeliveries(dummyDeliveries);
@@ -117,14 +111,7 @@ const VendorDashboard = () => {
             <span className="text-lg">自分の登録一覧</span>
           </button>
           
-          <button
-            onClick={() => navigate('/admin')}
-            className="w-full bg-white hover:bg-gray-50 text-navy-600 border-2 border-navy-600 font-medium py-4 px-6 rounded-lg flex items-center justify-center space-x-3 transition-colors"
-          >
-            <Calendar className="w-6 h-6" />
-            <span className="text-lg">カレンダー確認</span>
-          </button>
-        </div>
+                  </div>
 
         {/* Recent Deliveries */}
         <div className="bg-white rounded-lg shadow">

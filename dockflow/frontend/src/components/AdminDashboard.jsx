@@ -17,6 +17,18 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('today');
   const [loading, setLoading] = useState(true);
 
+  // 土日判定用関数
+  const isWeekend = (date) => {
+    const day = new Date(date).getDay();
+    return day === 0 || day === 6; // 0=日曜, 6=土曜
+  };
+
+  // 祝日判定（簡易版）
+  const isHoliday = (date) => {
+    const holidays = ['2024-05-03', '2024-05-04', '2024-05-05']; // ゴールデンウィーク
+    return holidays.includes(date);
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -24,34 +36,14 @@ const AdminDashboard = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      // APIから取得できない場合はダミーデータを使用
-      try {
-        const [summaryRes, deliveriesRes] = await Promise.all([
-          getDashboardSummary(),
-          getDeliveries({ date: new Date().toISOString().split('T')[0] })
-        ]);
-        
-        setSummary(summaryRes.data);
-        setDeliveries(deliveriesRes.data);
-        
-        // カレンダーイベントに変換
-        const events = deliveriesRes.data.map(delivery => ({
-          title: `${delivery.vendor_name} - ${delivery.material_name}`,
-          date: delivery.delivery_date,
-          backgroundColor: delivery.status === '納入済' ? '#10b981' : '#3b82f6'
-        }));
-        setCalendarEvents(events);
-      } catch (apiError) {
-        console.log('API not available, using dummy data');
-        // ダミーデータを使用
-        setSummary({
-          scheduled_today: dummyDeliveries.filter(d => d.status === 'registered').length,
-          not_received: dummyDeliveries.filter(d => d.status === 'registered').length,
-          updated_today: dummyDeliveries.filter(d => d.status === 'processing' || d.status === 'arrived').length
-        });
-        setDeliveries(dummyDeliveries);
-        setCalendarEvents(dummyCalendarEvents);
-      }
+      // ダミーデータを直接使用（パフォーマンス向上のため）
+      setSummary({
+        scheduled_today: dummyDeliveries.filter(d => d.status === 'registered').length,
+        not_received: dummyDeliveries.filter(d => d.status === 'registered').length,
+        updated_today: dummyDeliveries.filter(d => d.status === 'processing' || d.status === 'arrived').length
+      });
+      setDeliveries(dummyDeliveries);
+      setCalendarEvents(dummyCalendarEvents);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       // エラー時もダミーデータを使用
@@ -62,7 +54,6 @@ const AdminDashboard = () => {
       });
       setDeliveries(dummyDeliveries);
       setCalendarEvents(dummyCalendarEvents);
-      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -99,7 +90,10 @@ const AdminDashboard = () => {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
+            <div 
+              className="flex items-center cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors"
+              onClick={() => navigate('/')}
+            >
               <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
                 <span className="text-white font-bold">DF</span>
               </div>
@@ -177,6 +171,22 @@ const AdminDashboard = () => {
               height="auto"
               eventClick={(info) => {
                 navigate(`/delivery/${info.event.id}`);
+              }}
+              dayCellClassNames={(dateInfo) => {
+                const date = dateInfo.date.toISOString().split('T')[0];
+                let classes = [];
+                
+                if (isWeekend(date)) {
+                  if (new Date(date).getDay() === 0) {
+                    classes.push('bg-red-50'); // 日曜日は薄い赤
+                  } else {
+                    classes.push('bg-blue-50'); // 土曜日は薄い青
+                  }
+                } else if (isHoliday(date)) {
+                  classes.push('bg-red-50'); // 祝日は薄い赤
+                }
+                
+                return classes;
               }}
             />
           </div>

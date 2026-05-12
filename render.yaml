@@ -1,6 +1,6 @@
 services:
   # PostgreSQL Database
-  - type: postgres
+  - type: psql
     name: dockflow-db
     databaseName: dockflow
     user: dockflow_user

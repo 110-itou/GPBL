@@ -28,7 +28,7 @@ services:
   - type: web
     name: dockflow-frontend
     runtime: static
-    rootDir: frontend
+    rootDir: dockflow/frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:

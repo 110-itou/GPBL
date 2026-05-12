@@ -46,3 +46,4 @@ databases:
   - name: dockflow-db
     databaseName: dockflow
     user: dockflow_user
+    plan: free

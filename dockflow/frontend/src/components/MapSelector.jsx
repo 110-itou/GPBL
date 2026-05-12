@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { MapPin, ArrowLeft, Check } from 'lucide-react';
+import mapImage from '../assets/map.png';
 
 const MapSelector = () => {
   const navigate = useNavigate();
@@ -93,12 +94,12 @@ const MapSelector = () => {
             {mapError ? (
               <div className="text-red-600 text-center p-8 border-2 border-red-300 rounded-lg">
                 <p className="text-lg font-semibold mb-2">map.png が見つかりません。</p>
-                <p className="text-sm">frontend/public/map.png に配置してください</p>
+                <p className="text-sm">frontend/src/assets/map.png に配置してください</p>
               </div>
             ) : (
               <>
                 <img
-                  src="/map.png"
+                  src={mapImage}
                   alt="保管場所図面"
                   className="max-w-full h-auto"
                   style={{ maxHeight: '400px' }}

@@ -34,6 +34,8 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://dockflow-api-backend.onrender.com/api
+      - key: NODE_ENV
+        value: production
     routes:
       - type: rewrite
         source: /api/*

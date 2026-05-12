@@ -3,7 +3,7 @@ services:
   - type: web
     name: dockflow-backend
     runtime: node
-    rootDir: backend
+    rootDir: dockflow/backend
     buildCommand: npm install && npm run migrate
     startCommand: npm start
     plan: free

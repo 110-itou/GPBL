@@ -3,7 +3,7 @@ services:
   - type: web
     name: dockflow-backend
     runtime: node
-    rootDir: dockflow/backend
+    rootDir: backend
     buildCommand: npm install && npm run migrate
     startCommand: npm start
     plan: free
@@ -28,7 +28,7 @@ services:
   - type: web
     name: dockflow-frontend
     runtime: static
-    rootDir: dockflow/frontend
+    rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:

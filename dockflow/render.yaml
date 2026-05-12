@@ -10,7 +10,7 @@ services:
     name: dockflow-backend
     runtime: node
     rootDir: backend
-    buildCommand: npm install
+    buildCommand: npm install && npm run migrate
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
@@ -34,7 +34,7 @@ services:
     name: dockflow-frontend
     runtime: static
     rootDir: frontend
-    buildCommand: npm run build
+    buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL

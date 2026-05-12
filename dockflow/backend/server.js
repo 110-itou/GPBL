@@ -20,14 +20,25 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-// Test database connection
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Database connection error:', err);
-  } else {
-    console.log('Database connected successfully at:', res.rows[0].now);
+// Test database connection with retry
+const testDbConnection = async (retries = 5) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await pool.query('SELECT NOW()');
+      console.log('Database connected successfully at:', res.rows[0].now);
+      return true;
+    } catch (err) {
+      console.error(`Database connection attempt ${i + 1} failed:`, err.message);
+      if (i < retries - 1) {
+        console.log('Retrying in 5 seconds...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    }
   }
-});
+  return false;
+};
+
+testDbConnection();
 
 // Routes
 app.get('/api/health', (req, res) => {

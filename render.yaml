@@ -1,5 +1,5 @@
 services:
-  # PostgreSQL Database
+  # Backend API
   - type: web
     name: dockflow-backend
     runtime: node
@@ -46,21 +46,3 @@ databases:
   - name: dockflow-db
     databaseName: dockflow
     user: dockflow_user
-    
-  # Frontend
-  - type: web
-    name: dockflow-frontend
-    runtime: static
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://dockflow-backend.onrender.com/api
-    routes:
-      - type: rewrite
-        source: /api/*
-        destination: https://dockflow-backend.onrender.com/api/*
-      - type: rewrite
-        source: /*
-        destination: /index.html

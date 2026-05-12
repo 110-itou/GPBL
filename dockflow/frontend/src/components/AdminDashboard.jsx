@@ -201,26 +201,7 @@ const AdminDashboard = () => {
             <FullCalendar
               plugins={[dayGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
-              events={
-                dummyCalendarEvents.map(event => {
-                  // 対応する納入物を検索
-                  const delivery = dummyDeliveries.find(d => 
-                    d.vendor_name.includes(event.title.split(' - ')[0]) && 
-                    d.material_name.includes(event.title.split(' - ')[1])
-                  );
-                  
-                  return {
-                    title: `${event.title}`,
-                    date: event.date,
-                    backgroundColor: delivery ? getVendorColor(delivery.vendor_name) : '#6b7280',
-                    textColor: '#ffffff',
-                    extendedProps: {
-                      deliveryId: delivery?.id,
-                      status: delivery?.status || '納入予定'
-                    }
-                  };
-                })
-              }
+              events={calendarEvents}
               headerToolbar={{
                 left: 'prev,next today',
                 center: 'title',

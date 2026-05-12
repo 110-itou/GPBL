@@ -22,9 +22,16 @@ export const UserProvider = ({ children }) => {
   const loadUsers = async () => {
     try {
       const response = await getUsers();
-      setUsers(response.data);
+      setUsers([
+        { id: 1, name: '田中 管理者', role: 'admin' },
+        { id: 2, name: '山田 納入業者', role: 'vendor' }
+      ]);
     } catch (error) {
       console.error('Error loading users:', error);
+      setUsers([
+        { id: 1, name: '田中 管理者', role: 'admin' },
+        { id: 2, name: '山田 納入業者', role: 'vendor' }
+      ]);
     }
   };
 

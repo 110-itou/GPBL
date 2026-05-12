@@ -8,22 +8,24 @@ const UserSelection = () => {
 
   const handleUserSelect = (user) => {
     selectUser(user);
-    if (user.role === 'admin') {
-      navigate('/admin');
-    } else {
-      navigate('/vendor');
-    }
+    setTimeout(() => {
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/vendor');
+      }
+    }, 100);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-navy-50 to-navy-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="w-24 h-24 bg-navy-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-white text-3xl font-bold">DF</span>
+          <div className="w-32 h-32 mx-auto mb-4 flex items-center justify-center">
+            <img src="/yano-logo.png" alt="YANO Shipbuilding" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-navy-800 mb-2">DockFlow</h1>
-          <p className="text-gray-600">造船部材リアルタイム管理システム</p>
+          <h1 className="text-3xl font-bold text-blue-900 mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>DockFlow</h1>
+          <p className="text-gray-700" style={{ fontFamily: 'Arial, sans-serif' }}>造船部材リアルタイム管理システム</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-6">

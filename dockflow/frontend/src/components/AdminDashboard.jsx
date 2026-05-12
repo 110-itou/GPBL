@@ -52,13 +52,25 @@ const AdminDashboard = () => {
       });
       setDeliveries(dummyDeliveries);
       
-      // カレンダーイベントに変換
+      // カレンダーイベントに変換（1納入物当たり最新の状態のみ表示）
+      const latestDeliveryStatus = {};
+      
+      // 各納入物の最新状態を取得
+      dummyDeliveries.forEach(delivery => {
+        const key = `${delivery.vendor_name}_${delivery.material_name}`;
+        if (!latestDeliveryStatus[key] || new Date(delivery.updatedAt) > new Date(latestDeliveryStatus[key].updatedAt)) {
+          latestDeliveryStatus[key] = delivery;
+        }
+      });
+      
+      // カレンダーイベントを作成（1納入物当たり1件のみ）
       const events = dummyCalendarEvents.map(event => {
-        // 対応する納入物を検索
         const delivery = dummyDeliveries.find(d => 
           d.vendor_name.includes(event.title.split(' - ')[0]) && 
           d.material_name.includes(event.title.split(' - ')[1])
         );
+        
+        const latestDelivery = latestDeliveryStatus[`${delivery?.vendor_name}_${delivery?.material_name}`];
         
         return {
           title: `${event.title}`,
@@ -67,7 +79,7 @@ const AdminDashboard = () => {
           textColor: '#ffffff',
           extendedProps: {
             deliveryId: delivery?.id,
-            status: delivery?.status || '納入予定'
+            status: latestDelivery?.status || '納入予定'
           }
         };
       });

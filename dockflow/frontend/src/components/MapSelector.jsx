@@ -93,7 +93,7 @@ const MapSelector = () => {
             {mapError ? (
               <div className="text-red-600 text-center p-8 border-2 border-red-300 rounded-lg">
                 <p className="text-lg font-semibold mb-2">map.png が見つかりません。</p>
-                <p className="text-sm">frontend/src/assets/map.png に配置してください</p>
+                <p className="text-sm">frontend/public/map.png に配置してください</p>
               </div>
             ) : (
               <>

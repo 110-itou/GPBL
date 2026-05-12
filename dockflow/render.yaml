@@ -1,10 +1,4 @@
 services:
-  # PostgreSQL Database
-  - type: postgres
-    name: dockflow-db
-    databaseName: dockflow
-    user: dockflow_user
-    
   # Backend API
   - type: web
     name: dockflow-backend
@@ -12,6 +6,7 @@ services:
     rootDir: backend
     buildCommand: npm install && npm run migrate
     startCommand: npm start
+    plan: free
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -46,3 +41,10 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+
+databases:
+  # PostgreSQL Database
+  - name: dockflow-db
+    databaseName: dockflow
+    user: dockflow_user
+    plan: free

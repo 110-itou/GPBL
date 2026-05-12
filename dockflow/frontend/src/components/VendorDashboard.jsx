@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { getDeliveries } from '../services/api';
 import { Package, Plus, Calendar, List, LogOut } from 'lucide-react';
+import { dummyDeliveries } from '../data/dummyData';
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
@@ -17,10 +18,17 @@ const VendorDashboard = () => {
   const loadMyDeliveries = async () => {
     try {
       setLoading(true);
-      const response = await getDeliveries({ vendor_id: selectedUser?.vendor_id });
-      setDeliveries(response.data);
+      // APIから取得できない場合はダミーデータを使用
+      try {
+        const response = await getDeliveries({ vendor_id: selectedUser?.vendor_id });
+        setDeliveries(response.data);
+      } catch (apiError) {
+        console.log('API not available, using dummy data');
+        setDeliveries(dummyDeliveries);
+      }
     } catch (error) {
       console.error('Error loading deliveries:', error);
+      setDeliveries(dummyDeliveries);
     } finally {
       setLoading(false);
     }

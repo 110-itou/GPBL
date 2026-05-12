@@ -6,6 +6,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { Calendar, Package, AlertCircle, RefreshCw, Users, Settings, Download, Search, Plus } from 'lucide-react';
+import { dummyDeliveries, dummyCalendarEvents, dummyNotifications } from '../data/dummyData';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -23,28 +24,44 @@ const AdminDashboard = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [summaryRes, deliveriesRes] = await Promise.all([
-        getDashboardSummary(),
-        getDeliveries({ date: new Date().toISOString().split('T')[0] })
-      ]);
-      
-      setSummary(summaryRes.data);
-      setDeliveries(deliveriesRes.data);
-      
-      // Prepare calendar events
-      const events = deliveriesRes.data.map(delivery => ({
-        id: delivery.id,
-        title: `${delivery.item_name} (${delivery.vendor_name})`,
-        date: delivery.scheduled_date,
-        backgroundColor: delivery.color_code || '#4a6fa1',
-        extendedProps: {
-          status: delivery.status,
-          location: delivery.current_location,
-          systemId: delivery.system_id
-        }
-      }));
-      setCalendarEvents(events);
+      // APIから取得できない場合はダミーデータを使用
+      try {
+        const [summaryRes, deliveriesRes] = await Promise.all([
+          getDashboardSummary(),
+          getDeliveries({ date: new Date().toISOString().split('T')[0] })
+        ]);
+        
+        setSummary(summaryRes.data);
+        setDeliveries(deliveriesRes.data);
+        
+        // カレンダーイベントに変換
+        const events = deliveriesRes.data.map(delivery => ({
+          title: `${delivery.vendor_name} - ${delivery.material_name}`,
+          date: delivery.delivery_date,
+          backgroundColor: delivery.status === '納入済' ? '#10b981' : '#3b82f6'
+        }));
+        setCalendarEvents(events);
+      } catch (apiError) {
+        console.log('API not available, using dummy data');
+        // ダミーデータを使用
+        setSummary({
+          scheduled_today: dummyDeliveries.filter(d => d.status === 'registered').length,
+          not_received: dummyDeliveries.filter(d => d.status === 'registered').length,
+          updated_today: dummyDeliveries.filter(d => d.status === 'processing' || d.status === 'arrived').length
+        });
+        setDeliveries(dummyDeliveries);
+        setCalendarEvents(dummyCalendarEvents);
+      }
     } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      // エラー時もダミーデータを使用
+      setSummary({
+        scheduled_today: dummyDeliveries.filter(d => d.status === 'registered').length,
+        not_received: dummyDeliveries.filter(d => d.status === 'registered').length,
+        updated_today: dummyDeliveries.filter(d => d.status === 'processing' || d.status === 'arrived').length
+      });
+      setDeliveries(dummyDeliveries);
+      setCalendarEvents(dummyCalendarEvents);
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);

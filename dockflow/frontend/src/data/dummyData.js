@@ -145,7 +145,7 @@ export const dummyCalendarEvents = [
     endTime: '15:00',
     location: 'C',
     type: 'delivery',
-    status: 'in-progress'
+    status: 'completed'
   },
   {
     id: 4,
@@ -155,17 +155,17 @@ export const dummyCalendarEvents = [
     endTime: '09:00',
     location: 'D',
     type: 'delivery',
-    status: 'scheduled'
+    status: 'completed'
   },
   {
     id: 5,
     title: '伊藤機械 - モーター納入',
-    date: '2024-05-18',
+    date: '2024-05-15',
     startTime: '11:00',
     endTime: '12:00',
     location: 'E',
     type: 'delivery',
-    status: 'scheduled'
+    status: 'completed'
   }
 ];
 

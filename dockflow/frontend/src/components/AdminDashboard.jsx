@@ -29,6 +29,14 @@ const AdminDashboard = () => {
     return holidays.includes(date);
   };
 
+  // 業者別色分け
+  const getVendorColor = (vendorName) => {
+    if (vendorName.includes('山田')) return '#3b82f6'; // 青
+    if (vendorName.includes('佐藤')) return '#10b981'; // 緑
+    if (vendorName.includes('鈴木')) return '#f97316'; // オレンジ
+    return '#6b7280'; // デフォルト（灰色）
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -38,12 +46,32 @@ const AdminDashboard = () => {
       setLoading(true);
       // ダミーデータを直接使用（パフォーマンス向上のため）
       setSummary({
-        scheduled_today: dummyDeliveries.filter(d => d.status === 'registered').length,
-        not_received: dummyDeliveries.filter(d => d.status === 'registered').length,
-        updated_today: dummyDeliveries.filter(d => d.status === 'processing' || d.status === 'arrived').length
+        scheduled_today: dummyDeliveries.filter(d => d.status === '納入予定').length,
+        not_received: dummyDeliveries.filter(d => d.status === '納入予定').length,
+        updated_today: dummyDeliveries.filter(d => d.status === '納入済' || d.status === '移動済').length
       });
       setDeliveries(dummyDeliveries);
-      setCalendarEvents(dummyCalendarEvents);
+      
+      // カレンダーイベントに変換
+      const events = dummyCalendarEvents.map(event => {
+        // 対応する納入物を検索
+        const delivery = dummyDeliveries.find(d => 
+          d.vendor_name.includes(event.title.split(' - ')[0]) && 
+          d.material_name.includes(event.title.split(' - ')[1])
+        );
+        
+        return {
+          title: `${event.title}`,
+          date: event.date,
+          backgroundColor: delivery ? getVendorColor(delivery.vendor_name) : '#6b7280',
+          textColor: '#ffffff',
+          extendedProps: {
+            deliveryId: delivery?.id,
+            status: delivery?.status || '納入予定'
+          }
+        };
+      });
+      setCalendarEvents(events);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       // エラー時もダミーデータを使用
@@ -81,6 +109,17 @@ const AdminDashboard = () => {
       case '移動済': return 'text-orange-600 bg-orange-50';
       case '使用済': return 'text-gray-600 bg-gray-50';
       default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  // ステータス表示用
+  const getStatusText = (status) => {
+    switch (status) {
+      case '納入予定': return '納入予定';
+      case '納入済': return '納入済';
+      case '移動済': return '移動済';
+      case '使用済': return '使用済';
+      default: return '納入予定';
     }
   };
 
@@ -162,7 +201,26 @@ const AdminDashboard = () => {
             <FullCalendar
               plugins={[dayGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
-              events={calendarEvents}
+              events={
+                dummyCalendarEvents.map(event => {
+                  // 対応する納入物を検索
+                  const delivery = dummyDeliveries.find(d => 
+                    d.vendor_name.includes(event.title.split(' - ')[0]) && 
+                    d.material_name.includes(event.title.split(' - ')[1])
+                  );
+                  
+                  return {
+                    title: `${event.title}`,
+                    date: event.date,
+                    backgroundColor: delivery ? getVendorColor(delivery.vendor_name) : '#6b7280',
+                    textColor: '#ffffff',
+                    extendedProps: {
+                      deliveryId: delivery?.id,
+                      status: delivery?.status || '納入予定'
+                    }
+                  };
+                })
+              }
               headerToolbar={{
                 left: 'prev,next today',
                 center: 'title',
@@ -170,7 +228,7 @@ const AdminDashboard = () => {
               }}
               height="auto"
               eventClick={(info) => {
-                navigate(`/delivery/${info.event.id}`);
+                navigate(`/delivery/${info.event.extendedProps.deliveryId}`);
               }}
               dayCellClassNames={(dateInfo) => {
                 const date = dateInfo.date.toISOString().split('T')[0];
@@ -187,6 +245,19 @@ const AdminDashboard = () => {
                 }
                 
                 return classes;
+              }}
+              eventContent={(eventInfo) => {
+                const { event } = eventInfo;
+                const delivery = dummyDeliveries.find(d => d.id === event.extendedProps.deliveryId);
+                
+                return (
+                  <div className="p-1">
+                    <div className="text-xs font-semibold">{event.title}</div>
+                    {delivery && (
+                      <div className="text-xs mt-1">{getStatusText(delivery.status)}</div>
+                    )}
+                  </div>
+                );
               }}
             />
           </div>

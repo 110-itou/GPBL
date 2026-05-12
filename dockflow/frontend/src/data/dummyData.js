@@ -10,7 +10,7 @@ export const dummyDeliveries = [
     quantity: 50,
     unit: '枚',
     location: 'A',
-    status: 'registered',
+    status: '納入予定',
     notes: '船体部材用',
     createdAt: '2024-05-13T08:30:00Z',
     updatedAt: '2024-05-13T08:30:00Z'
@@ -24,7 +24,7 @@ export const dummyDeliveries = [
     quantity: 100,
     unit: '本',
     location: 'B',
-    status: 'arrived',
+    status: '納入済',
     notes: '配管工事用',
     createdAt: '2024-05-13T09:00:00Z',
     updatedAt: '2024-05-13T10:45:00Z'
@@ -38,7 +38,7 @@ export const dummyDeliveries = [
     quantity: 200,
     unit: 'セット',
     location: 'C',
-    status: 'processing',
+    status: '移動済',
     notes: '締結用部材',
     createdAt: '2024-05-13T11:00:00Z',
     updatedAt: '2024-05-13T14:30:00Z'
@@ -52,7 +52,7 @@ export const dummyDeliveries = [
     quantity: 30,
     unit: '個',
     location: 'D',
-    status: 'completed',
+    status: '使用済',
     notes: '基礎工事用',
     createdAt: '2024-05-13T15:00:00Z',
     updatedAt: '2024-05-14T09:00:00Z'
@@ -66,7 +66,7 @@ export const dummyDeliveries = [
     quantity: 5,
     unit: '台',
     location: 'E',
-    status: 'registered',
+    status: '納入予定',
     notes: '推進機用',
     createdAt: '2024-05-13T16:00:00Z',
     updatedAt: '2024-05-13T16:00:00Z'

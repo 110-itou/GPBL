@@ -70,6 +70,9 @@ const AdminDashboard = () => {
       // まず最新状態の納入物のみをフィルタリング
       const latestDeliveries = Object.values(latestDeliveryStatus);
       
+      // デバッグ用：最新状態の納入物を確認
+      console.log('Latest deliveries:', latestDeliveries);
+      
       // 最新状態の納入物のみをカレンダーイベントに変換
       latestDeliveries.forEach(delivery => {
         const deliveryKey = `${delivery.vendor_name}_${delivery.material_name}`;
@@ -84,9 +87,12 @@ const AdminDashboard = () => {
             event.title.includes(delivery.material_name)
           );
           
+          // 日付を決定（カレンダーイベントの優先、なければ納入物の更新日）
+          const eventDate = calendarEvent?.date || delivery.updatedAt?.split('T')[0] || new Date().toISOString().split('T')[0];
+          
           uniqueEvents.push({
             title: `${delivery.vendor_name} - ${delivery.material_name}`,
-            date: calendarEvent?.date || delivery.updatedAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+            date: eventDate,
             backgroundColor: getVendorColor(delivery.vendor_name),
             textColor: '#ffffff',
             extendedProps: {
@@ -98,6 +104,9 @@ const AdminDashboard = () => {
           });
         }
       });
+      
+      // デバッグ用：最終的なカレンダーイベントを確認
+      console.log('Final calendar events:', uniqueEvents);
       
       setCalendarEvents(uniqueEvents);
     } catch (error) {

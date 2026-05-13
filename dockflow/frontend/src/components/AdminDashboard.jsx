@@ -63,27 +63,39 @@ const AdminDashboard = () => {
         }
       });
       
-      // カレンダーイベントを作成（1納入物当たり1件のみ）
-      const events = dummyCalendarEvents.map(event => {
+      // 重複を排除したカレンダーイベントを作成（1納入物当たり1件のみ）
+      const uniqueEvents = [];
+      const processedKeys = new Set();
+      
+      dummyCalendarEvents.forEach(event => {
         const delivery = dummyDeliveries.find(d => 
           d.vendor_name.includes(event.title.split(' - ')[0]) && 
           d.material_name.includes(event.title.split(' - ')[1])
         );
         
-        const latestDelivery = latestDeliveryStatus[`${delivery?.vendor_name}_${delivery?.material_name}`];
-        
-        return {
-          title: `${event.title}`,
-          date: event.date,
-          backgroundColor: delivery ? getVendorColor(delivery.vendor_name) : '#6b7280',
-          textColor: '#ffffff',
-          extendedProps: {
-            deliveryId: delivery?.id,
-            status: latestDelivery?.status || '納入予定'
+        if (delivery) {
+          const key = `${delivery.vendor_name}_${delivery.material_name}`;
+          
+          // まだ処理されていない納入物のみ追加
+          if (!processedKeys.has(key)) {
+            processedKeys.add(key);
+            const latestDelivery = latestDeliveryStatus[key];
+            
+            uniqueEvents.push({
+              title: `${event.title}`,
+              date: event.date,
+              backgroundColor: delivery ? getVendorColor(delivery.vendor_name) : '#6b7280',
+              textColor: '#ffffff',
+              extendedProps: {
+                deliveryId: delivery?.id,
+                status: latestDelivery?.status || '納入予定'
+              }
+            });
           }
-        };
+        }
       });
-      setCalendarEvents(events);
+      
+      setCalendarEvents(uniqueEvents);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       // エラー時もダミーデータを使用

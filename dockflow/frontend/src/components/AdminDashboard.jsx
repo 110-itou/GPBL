@@ -74,14 +74,8 @@ const AdminDashboard = () => {
       
       // 最新状態の納入物のみをカレンダーイベントに変換
       latestDeliveries.forEach(delivery => {
-        // 対応するカレンダーイベントを検索
-        const calendarEvent = dummyCalendarEvents.find(event => 
-          event.title.includes(delivery.vendor_name) && 
-          event.title.includes(delivery.material_name)
-        );
-        
-        // 日付を決定（カレンダーイベントの優先、なければ納入物の更新日）
-        const eventDate = calendarEvent?.date || delivery.updatedAt?.split('T')[0] || new Date().toISOString().split('T')[0];
+        // 日付を決定（納入物の更新日を優先）
+        const eventDate = delivery.updatedAt?.split('T')[0] || new Date().toISOString().split('T')[0];
         
         uniqueEvents.push({
           title: `${delivery.material_name} - ${delivery.status}`,

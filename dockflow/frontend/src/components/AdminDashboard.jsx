@@ -65,7 +65,6 @@ const AdminDashboard = () => {
       
       // 完全に重複を排除したカレンダーイベントを作成（1納入物当たり1件のみ）
       const uniqueEvents = [];
-      const processedDeliveryKeys = new Set();
       
       // まず最新状態の納入物のみをフィルタリング
       const latestDeliveries = Object.values(latestDeliveryStatus);
@@ -75,34 +74,27 @@ const AdminDashboard = () => {
       
       // 最新状態の納入物のみをカレンダーイベントに変換
       latestDeliveries.forEach(delivery => {
-        const deliveryKey = `${delivery.vendor_name}_${delivery.material_name}`;
+        // 対応するカレンダーイベントを検索
+        const calendarEvent = dummyCalendarEvents.find(event => 
+          event.title.includes(delivery.vendor_name) && 
+          event.title.includes(delivery.material_name)
+        );
         
-        // まだ処理されていない納入物のみ追加
-        if (!processedDeliveryKeys.has(deliveryKey)) {
-          processedDeliveryKeys.add(deliveryKey);
-          
-          // 対応するカレンダーイベントを検索
-          const calendarEvent = dummyCalendarEvents.find(event => 
-            event.title.includes(delivery.vendor_name) && 
-            event.title.includes(delivery.material_name)
-          );
-          
-          // 日付を決定（カレンダーイベントの優先、なければ納入物の更新日）
-          const eventDate = calendarEvent?.date || delivery.updatedAt?.split('T')[0] || new Date().toISOString().split('T')[0];
-          
-          uniqueEvents.push({
-            title: `${delivery.vendor_name} - ${delivery.material_name}`,
-            date: eventDate,
-            backgroundColor: getVendorColor(delivery.vendor_name),
-            textColor: '#ffffff',
-            extendedProps: {
-              deliveryId: delivery.id,
-              status: delivery.status,
-              vendorName: delivery.vendor_name,
-              materialName: delivery.material_name
-            }
-          });
-        }
+        // 日付を決定（カレンダーイベントの優先、なければ納入物の更新日）
+        const eventDate = calendarEvent?.date || delivery.updatedAt?.split('T')[0] || new Date().toISOString().split('T')[0];
+        
+        uniqueEvents.push({
+          title: `${delivery.vendor_name} - ${delivery.material_name}`,
+          date: eventDate,
+          backgroundColor: getVendorColor(delivery.vendor_name),
+          textColor: '#ffffff',
+          extendedProps: {
+            deliveryId: delivery.id,
+            status: delivery.status,
+            vendorName: delivery.vendor_name,
+            materialName: delivery.material_name
+          }
+        });
       });
       
       // デバッグ用：最終的なカレンダーイベントを確認

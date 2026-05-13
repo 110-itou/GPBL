@@ -84,7 +84,7 @@ const AdminDashboard = () => {
         const eventDate = calendarEvent?.date || delivery.updatedAt?.split('T')[0] || new Date().toISOString().split('T')[0];
         
         uniqueEvents.push({
-          title: `${delivery.vendor_name} - ${delivery.material_name}`,
+          title: `${delivery.material_name} - ${delivery.status}`,
           date: eventDate,
           backgroundColor: getVendorColor(delivery.vendor_name),
           textColor: '#ffffff',

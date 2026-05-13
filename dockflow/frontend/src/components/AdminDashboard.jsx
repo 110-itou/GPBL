@@ -63,35 +63,39 @@ const AdminDashboard = () => {
         }
       });
       
-      // 重複を排除したカレンダーイベントを作成（1納入物当たり1件のみ）
+      // 完全に重複を排除したカレンダーイベントを作成（1納入物当たり1件のみ）
       const uniqueEvents = [];
-      const processedKeys = new Set();
+      const processedDeliveryKeys = new Set();
       
-      dummyCalendarEvents.forEach(event => {
-        const delivery = dummyDeliveries.find(d => 
-          d.vendor_name.includes(event.title.split(' - ')[0]) && 
-          d.material_name.includes(event.title.split(' - ')[1])
-        );
+      // まず最新状態の納入物のみをフィルタリング
+      const latestDeliveries = Object.values(latestDeliveryStatus);
+      
+      // 最新状態の納入物のみをカレンダーイベントに変換
+      latestDeliveries.forEach(delivery => {
+        const deliveryKey = `${delivery.vendor_name}_${delivery.material_name}`;
         
-        if (delivery) {
-          const key = `${delivery.vendor_name}_${delivery.material_name}`;
+        // まだ処理されていない納入物のみ追加
+        if (!processedDeliveryKeys.has(deliveryKey)) {
+          processedDeliveryKeys.add(deliveryKey);
           
-          // まだ処理されていない納入物のみ追加
-          if (!processedKeys.has(key)) {
-            processedKeys.add(key);
-            const latestDelivery = latestDeliveryStatus[key];
-            
-            uniqueEvents.push({
-              title: `${event.title}`,
-              date: event.date,
-              backgroundColor: delivery ? getVendorColor(delivery.vendor_name) : '#6b7280',
-              textColor: '#ffffff',
-              extendedProps: {
-                deliveryId: delivery?.id,
-                status: latestDelivery?.status || '納入予定'
-              }
-            });
-          }
+          // 対応するカレンダーイベントを検索
+          const calendarEvent = dummyCalendarEvents.find(event => 
+            event.title.includes(delivery.vendor_name) && 
+            event.title.includes(delivery.material_name)
+          );
+          
+          uniqueEvents.push({
+            title: `${delivery.vendor_name} - ${delivery.material_name}`,
+            date: calendarEvent?.date || delivery.updatedAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+            backgroundColor: getVendorColor(delivery.vendor_name),
+            textColor: '#ffffff',
+            extendedProps: {
+              deliveryId: delivery.id,
+              status: delivery.status,
+              vendorName: delivery.vendor_name,
+              materialName: delivery.material_name
+            }
+          });
         }
       });
       

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { getCalendarData, getDashboardSummary, getDeliveries, exportDeliveriesCSV } from '../services/api';
@@ -56,6 +56,15 @@ const deliveryUpdatedDate = (delivery) => (
 const getItemName = (delivery) => delivery.item_name || delivery.materialName || delivery.material_name || '品名未設定';
 const getVendorName = (delivery) => delivery.vendor_name || delivery.vendorName || '';
 
+const isNotReceivedDelivery = (delivery, today) => {
+  const scheduledDate = formatDate(delivery.scheduled_date || delivery.deliveryDate);
+  return Boolean(
+    scheduledDate &&
+    scheduledDate < today &&
+    !['使用済', '納入済'].includes(delivery.status)
+  );
+};
+
 const dedupeLatestDeliveries = (sourceDeliveries = []) => {
   const latestById = new Map();
 
@@ -82,6 +91,34 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('today');
   const [loading, setLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState('');
+  const detailSectionRef = useRef(null);
+  const today = formatDate(new Date());
+
+  const detailTabs = [
+    {
+      key: 'today',
+      summaryKey: 'scheduled_today',
+      label: '本日納入予定',
+      emptyText: '本日納入予定の納入物はありません',
+      matches: (delivery) => formatDate(delivery.scheduled_date || delivery.deliveryDate) === today
+    },
+    {
+      key: 'notReceived',
+      summaryKey: 'not_received',
+      label: '未受け取り',
+      emptyText: '未受け取りの納入物はありません',
+      matches: (delivery) => isNotReceivedDelivery(delivery, today)
+    },
+    {
+      key: 'updated',
+      summaryKey: 'updated_today',
+      label: '本日更新',
+      emptyText: '本日更新された納入物はありません',
+      matches: (delivery) => formatDate(deliveryUpdatedDate(delivery)) === today
+    }
+  ];
+  const activeDetail = detailTabs.find((tab) => tab.key === activeTab) || detailTabs[0];
+  const detailDeliveries = deliveries.filter(activeDetail.matches);
 
   const isWeekend = (date) => {
     const day = date.getDay();
@@ -101,7 +138,7 @@ const AdminDashboard = () => {
     const today = formatDate(new Date());
     return {
       scheduled_today: sourceDeliveries.filter(d => formatDate(d.scheduled_date || d.deliveryDate) === today).length,
-      not_received: sourceDeliveries.filter(d => d.status === '納入予定').length,
+      not_received: sourceDeliveries.filter(d => isNotReceivedDelivery(d, today)).length,
       updated_today: sourceDeliveries.filter(d => formatDate(deliveryUpdatedDate(d)) === today).length
     };
   };
@@ -212,6 +249,27 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleSummaryClick = (tabKey) => {
+    setActiveTab(tabKey);
+    window.setTimeout(() => {
+      detailSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  };
+
+  const getDetailDateText = (delivery) => {
+    if (activeTab === 'updated') {
+      return `更新日: ${formatDate(deliveryUpdatedDate(delivery)) || '-'}`;
+    }
+
+    return `納入予定日: ${formatDate(delivery.scheduled_date || delivery.deliveryDate) || '-'}`;
+  };
+
+  const getSummaryCardClass = (tabKey, colorClass) => (
+    `w-full bg-white rounded-lg shadow p-6 border-l-4 ${colorClass} text-left transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2 ${
+      activeTab === tabKey ? 'ring-2 ring-navy-200' : ''
+    }`
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -254,7 +312,12 @@ const AdminDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Notifications */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+          <button
+            type="button"
+            onClick={() => handleSummaryClick('today')}
+            className={getSummaryCardClass('today', 'border-blue-500')}
+            aria-pressed={activeTab === 'today'}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">本日納入予定</p>
@@ -262,19 +325,29 @@ const AdminDashboard = () => {
               </div>
               <Calendar className="w-8 h-8 text-blue-500" />
             </div>
-          </div>
+          </button>
           
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
+          <button
+            type="button"
+            onClick={() => handleSummaryClick('notReceived')}
+            className={getSummaryCardClass('notReceived', 'border-orange-500')}
+            aria-pressed={activeTab === 'notReceived'}
+          >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">未受取</p>
+                <p className="text-sm text-gray-600 mb-1">未受け取り</p>
                 <p className="text-2xl font-bold text-orange-600">{summary.not_received}</p>
               </div>
               <AlertCircle className="w-8 h-8 text-orange-500" />
             </div>
-          </div>
+          </button>
           
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+          <button
+            type="button"
+            onClick={() => handleSummaryClick('updated')}
+            className={getSummaryCardClass('updated', 'border-green-500')}
+            aria-pressed={activeTab === 'updated'}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">本日更新</p>
@@ -282,7 +355,7 @@ const AdminDashboard = () => {
               </div>
               <RefreshCw className="w-8 h-8 text-green-500" />
             </div>
-          </div>
+          </button>
         </div>
 
         {dashboardError && (
@@ -335,29 +408,24 @@ const AdminDashboard = () => {
         </div>
 
         {/* Tabs and Content */}
-        <div className="bg-white rounded-lg shadow">
+        <div ref={detailSectionRef} className="bg-white rounded-lg shadow">
           <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
-              <button
-                onClick={() => setActiveTab('today')}
-                className={`py-4 px-6 text-sm font-medium border-b-2 ${
-                  activeTab === 'today'
-                    ? 'border-navy-500 text-navy-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                本日予定
-              </button>
-              <button
-                onClick={() => setActiveTab('recent')}
-                className={`py-4 px-6 text-sm font-medium border-b-2 ${
-                  activeTab === 'recent'
-                    ? 'border-navy-500 text-navy-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                最新更新
-              </button>
+            <nav className="flex -mb-px overflow-x-auto" aria-label="集計詳細">
+              {detailTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`whitespace-nowrap py-4 px-6 text-sm font-medium border-b-2 ${
+                    activeTab === tab.key
+                      ? 'border-navy-500 text-navy-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {tab.label}
+                  <span className="ml-2 text-xs text-gray-400">{summary[tab.summaryKey]}</span>
+                </button>
+              ))}
             </nav>
           </div>
 
@@ -368,18 +436,24 @@ const AdminDashboard = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {deliveries.map((delivery) => (
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-800">{activeDetail.label}</h2>
+                  <span className="text-sm text-gray-500">{detailDeliveries.length} 件</span>
+                </div>
+
+                {detailDeliveries.map((delivery) => (
                   <div
-                    key={delivery.id}
+                    key={delivery.id || delivery.system_id}
                     className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
                     onClick={() => navigate(`/delivery/${delivery.id}`)}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getVendorColor(getVendorName(delivery), delivery.color_code) }}></div>
                         <div>
                           <p className="font-medium text-gray-900">{getItemName(delivery)}</p>
                           <p className="text-sm text-gray-500">{getVendorName(delivery)} - 場所: {delivery.current_location}</p>
+                          <p className="text-xs text-gray-400">{getDetailDateText(delivery)}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4">
@@ -392,10 +466,10 @@ const AdminDashboard = () => {
                   </div>
                 ))}
                 
-                {deliveries.length === 0 && (
+                {detailDeliveries.length === 0 && (
                   <div className="text-center py-8">
                     <Package className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500">該当する納入物がありません</p>
+                    <p className="text-gray-500">{activeDetail.emptyText}</p>
                   </div>
                 )}
               </div>

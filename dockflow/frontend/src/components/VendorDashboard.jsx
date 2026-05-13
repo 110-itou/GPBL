@@ -81,7 +81,7 @@ const VendorDashboard = () => {
             {selectedUser?.name}様
           </h2>
           <p className="text-gray-600">
-            この画面は納入管理メニュー
+            納入管理メニュー
           </p>
         </div>
 

@@ -43,11 +43,7 @@ const UserSelection = () => {
           <p className="text-gray-700" style={{ fontFamily: 'Arial, sans-serif' }}>造船部材リアルタイム管理システム</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
-            ユーザーを選択してください
-          </h2>
-
+        <div className="bg-white rounded-xl shadow-lg p-5 max-w-md mx-auto">
           <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
             <button
               onClick={() => handleDirectNavigation('admin')}
@@ -64,12 +60,6 @@ const UserSelection = () => {
               <span className="text-base font-semibold whitespace-nowrap">納入業者</span>
             </button>
           </div>
-        </div>
-
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-500">
-            © 2024 DockFlow. All rights reserved.
-          </p>
         </div>
       </div>
     </div>

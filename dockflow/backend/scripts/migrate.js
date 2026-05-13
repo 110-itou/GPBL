@@ -20,7 +20,7 @@ const createTables = async () => {
         name VARCHAR(100) NOT NULL,
         email VARCHAR(255),
         password VARCHAR(255),
-        role VARCHAR(20) NOT NULL CHECK role IN ('admin','vendor'),
+        role VARCHAR(20) NOT NULL CHECK (role IN ('admin','vendor')),
         vendor_id INTEGER,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         deleted_at TIMESTAMP NULL
@@ -58,8 +58,8 @@ const createTables = async () => {
         vendor_id INTEGER NOT NULL,
         created_by INTEGER NOT NULL,
         order_no VARCHAR(100) NULL,
-        status VARCHAR(20) NOT NULL CHECK status IN ('納入予定','納入済','移動済','使用済'),
-        current_location VARCHAR(1) NOT NULL CHECK current_location IN ('A','B','C','D','E','F','G','H','I','J','K'),
+        status VARCHAR(20) NOT NULL CHECK (status IN ('納入予定','納入済','移動済','使用済')),
+        current_location VARCHAR(1) NOT NULL CHECK (current_location IN ('A','B','C','D','E','F','G','H','I','J','K')),
         quantity DECIMAL(10,2) NOT NULL,
         scheduled_date DATE NULL,
         received_date DATE NULL,
@@ -88,7 +88,7 @@ const createTables = async () => {
       CREATE TABLE IF NOT EXISTS attachments (
         id SERIAL PRIMARY KEY,
         delivery_id INTEGER NOT NULL,
-        file_type VARCHAR(20) NOT NULL CHECK file_type IN ('photo','pdf'),
+        file_type VARCHAR(20) NOT NULL CHECK (file_type IN ('photo','pdf')),
         file_url TEXT NOT NULL,
         file_name VARCHAR(255),
         uploaded_by INTEGER NOT NULL,

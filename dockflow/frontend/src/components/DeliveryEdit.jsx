@@ -150,18 +150,18 @@ const DeliveryEdit = () => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex min-h-16 items-center py-3 sm:py-0">
             <div className="flex items-center">
               <button
                 onClick={handleBack}
-                className="mr-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="touch-target mr-2 rounded-lg p-2 transition-colors hover:bg-gray-100 sm:mr-3"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+                className="flex min-w-0 items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
                 aria-label="トップへ戻る"
               >
                 <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
@@ -178,21 +178,21 @@ const DeliveryEdit = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-navy-800 mb-2">
+      <main className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-8">
+        <div className="mb-6 text-center sm:mb-8">
+          <h2 className="mb-2 text-xl font-bold text-navy-800 sm:text-2xl">
             納入情報編集
           </h2>
-          <div className="bg-gray-100 rounded-lg p-3 inline-block">
+          <div className="inline-flex max-w-full flex-col gap-1 rounded-lg bg-gray-100 p-3 text-sm sm:inline-block sm:text-base">
             <span className="font-medium text-gray-700">{delivery.item_name}</span>
-            <span className="mx-2 text-gray-500">|</span>
+            <span className="mx-2 hidden text-gray-500 sm:inline">|</span>
             <span className="font-medium text-gray-700">場所: {delivery.current_location}</span>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Editable Information */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">編集可能項目</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -287,7 +287,7 @@ const DeliveryEdit = () => {
           </div>
 
           {/* Read-only Information */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">固定情報</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -319,12 +319,12 @@ const DeliveryEdit = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   場所
                 </label>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <input
                     type="text"
                     value={delivery.current_location}
                     readOnly
-                    className="flex-1 input-field bg-gray-100"
+                    className="input-field flex-1 bg-gray-100"
                   />
                   <button
                     type="button"
@@ -351,10 +351,10 @@ const DeliveryEdit = () => {
           </div>
 
           {/* File Upload */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">ファイル添付</h3>
             
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div className="rounded-lg border-2 border-dashed border-gray-300 p-5 text-center sm:p-6">
               <input
                 type="file"
                 id="file-upload"
@@ -378,13 +378,13 @@ const DeliveryEdit = () => {
             {uploadedFiles.length > 0 && (
               <div className="mt-4 space-y-2">
                 {uploadedFiles.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded">
-                    <div className="flex items-center space-x-3">
+                  <div key={index} className="flex items-center justify-between gap-3 rounded bg-gray-50 p-3">
+                    <div className="flex min-w-0 items-center space-x-3">
                       {file.type === 'photo' && file.preview && (
-                        <img src={file.preview} alt={file.name} className="w-10 h-10 object-cover rounded" />
+                        <img src={file.preview} alt={file.name} className="h-10 w-10 flex-shrink-0 rounded object-cover" />
                       )}
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-gray-900">{file.name}</p>
                         <p className="text-xs text-gray-500">{file.type === 'photo' ? '写真' : 'PDF'}</p>
                       </div>
                     </div>

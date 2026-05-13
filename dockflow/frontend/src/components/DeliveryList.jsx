@@ -128,18 +128,18 @@ const DeliveryList = () => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex min-h-16 items-center py-3 sm:py-0">
             <div className="flex items-center">
               <button
                 onClick={handleBack}
-                className="mr-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="touch-target mr-2 rounded-lg p-2 transition-colors hover:bg-gray-100 sm:mr-3"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+                className="flex min-w-0 items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
                 aria-label="トップへ戻る"
               >
                 <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
@@ -156,27 +156,27 @@ const DeliveryList = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-navy-800 mb-6">
+      <main className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="mb-4 text-xl font-bold text-navy-800 sm:mb-6 sm:text-2xl">
             {selectedUser?.role === 'admin' ? '納入物一覧' : '自分の登録一覧'}
           </h2>
 
           {/* Search Bar */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
               <input
                 type="text"
                 placeholder="品名、業者、発注番号で検索..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-500"
+                className="input-field pl-10"
               />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="flex min-h-11 items-center justify-center space-x-2 rounded-lg border border-gray-300 bg-white px-4 py-2 hover:bg-gray-50"
             >
               <Filter className="w-4 h-4" />
               <span>フィルター</span>
@@ -185,7 +185,7 @@ const DeliveryList = () => {
 
           {/* Filters */}
           {showFilters && (
-            <div className="bg-white rounded-lg shadow p-4 mb-6">
+            <div className="mb-6 rounded-lg bg-white p-4 shadow">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">品名</label>
@@ -281,51 +281,51 @@ const DeliveryList = () => {
             {filteredDeliveries.map((delivery) => (
               <div
                 key={delivery.id}
-                className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow cursor-pointer"
+                className="cursor-pointer rounded-lg bg-white p-4 shadow transition-shadow hover:shadow-md"
                 onClick={() => navigate(`/delivery/${delivery.id}`)}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: delivery.color_code }}></div>
-                    <span className="font-medium text-gray-900">{delivery.item_name}</span>
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center space-x-2">
+                    <div className="h-3 w-3 flex-shrink-0 rounded-full" style={{ backgroundColor: delivery.color_code }}></div>
+                    <span className="break-words font-medium text-gray-900">{delivery.item_name}</span>
                   </div>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(delivery.status)}`}>
+                  <span className={`flex-shrink-0 rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(delivery.status)}`}>
                     {delivery.status}
                   </span>
                 </div>
                 
                 <div className="space-y-1 text-sm text-gray-600">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-3">
                     <span>システムID:</span>
                     <span>{delivery.system_id}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-3">
                     <span>業者:</span>
-                    <span>{delivery.vendor_name}</span>
+                    <span className="text-right">{delivery.vendor_name}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-3">
                     <span>場所:</span>
                     <span>{delivery.current_location}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-3">
                     <span>個数:</span>
                     <span>{delivery.quantity}</span>
                   </div>
                   {delivery.scheduled_date && (
-                    <div className="flex justify-between">
+                    <div className="flex justify-between gap-3">
                       <span>納入予定日:</span>
                       <span>{delivery.scheduled_date}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-end space-x-2 mt-3">
+                <div className="mt-3 flex justify-end space-x-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       navigate(`/delivery/${delivery.id}`);
                     }}
-                    className="p-2 text-navy-600 hover:bg-navy-50 rounded"
+                    className="touch-target rounded p-2 text-navy-600 hover:bg-navy-50"
                   >
                     <Eye className="w-4 h-4" />
                   </button>
@@ -335,7 +335,7 @@ const DeliveryList = () => {
                         e.stopPropagation();
                         navigate(`/delivery/${delivery.id}/edit`);
                       }}
-                      className="p-2 text-navy-600 hover:bg-navy-50 rounded"
+                      className="touch-target rounded p-2 text-navy-600 hover:bg-navy-50"
                     >
                       <Edit className="w-4 h-4" />
                     </button>

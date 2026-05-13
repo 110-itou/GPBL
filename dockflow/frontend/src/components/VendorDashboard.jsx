@@ -44,11 +44,11 @@ const VendorDashboard = () => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex min-h-16 flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-0">
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+              className="flex min-w-0 items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
               aria-label="トップへ戻る"
             >
               <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
@@ -64,7 +64,7 @@ const VendorDashboard = () => {
                 clearUser();
                 navigate('/');
               }}
-              className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800"
+              className="flex min-h-11 w-full items-center justify-center space-x-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-800 sm:w-auto sm:px-2"
             >
               <LogOut className="w-4 h-4" />
               <span>ログアウト</span>
@@ -74,10 +74,10 @@ const VendorDashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-8">
         {/* Welcome Message */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-navy-800 mb-2">
+        <div className="mb-6 text-center sm:mb-8">
+          <h2 className="mb-2 text-xl font-bold text-navy-800 sm:text-2xl">
             {selectedUser?.name}様
           </h2>
           <p className="text-gray-600">
@@ -86,12 +86,12 @@ const VendorDashboard = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow p-4 text-center">
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-4">
+          <div className="rounded-lg bg-white p-4 text-center shadow">
             <p className="text-2xl font-bold text-navy-600">{deliveries.length}</p>
             <p className="text-sm text-gray-600">登録件数</p>
           </div>
-          <div className="bg-white rounded-lg shadow p-4 text-center">
+          <div className="rounded-lg bg-white p-4 text-center shadow">
             <p className="text-2xl font-bold text-blue-600">
               {deliveries.filter(d => d.status === '納入予定').length}
             </p>
@@ -100,7 +100,7 @@ const VendorDashboard = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="space-y-4 mb-8">
+        <div className="mb-6 space-y-3 sm:mb-8 sm:space-y-4">
           <button
             onClick={() => navigate('/map-selector')}
             className="w-full bg-navy-600 hover:bg-navy-700 text-white font-medium py-4 px-6 rounded-lg flex items-center justify-center space-x-3 transition-colors"
@@ -120,7 +120,7 @@ const VendorDashboard = () => {
                   </div>
 
         {/* Recent Deliveries */}
-        <div className="bg-white rounded-lg shadow">
+        <div className="rounded-lg bg-white shadow">
           <div className="p-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800">最近の登録</h3>
           </div>
@@ -138,11 +138,11 @@ const VendorDashboard = () => {
                   onClick={() => navigate(`/delivery/${delivery.id}`)}
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">{delivery.item_name}</p>
+                    <div className="min-w-0">
+                      <p className="break-words font-medium text-gray-900">{delivery.item_name}</p>
                       <p className="text-sm text-gray-500">場所: {delivery.current_location} | 個数: {delivery.quantity}</p>
                     </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(delivery.status)}`}>
+                    <span className={`ml-3 flex-shrink-0 rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(delivery.status)}`}>
                       {delivery.status}
                     </span>
                   </div>
@@ -170,7 +170,7 @@ const VendorDashboard = () => {
         </div>
 
         {/* Help Section */}
-        <div className="mt-8 bg-blue-50 rounded-lg p-4">
+        <div className="mt-6 rounded-lg bg-blue-50 p-4 sm:mt-8">
           <h4 className="font-medium text-blue-900 mb-2">ヘルプ</h4>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• 「納入登録」から新しい納入物を登録できます</li>

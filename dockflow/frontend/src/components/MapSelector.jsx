@@ -47,18 +47,18 @@ const MapSelector = () => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex min-h-16 items-center py-3 sm:py-0">
             <div className="flex items-center">
               <button
                 onClick={handleBack}
-                className="mr-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="touch-target mr-2 rounded-lg p-2 transition-colors hover:bg-gray-100 sm:mr-3"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+                className="flex min-w-0 items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
                 aria-label="トップへ戻る"
               >
                 <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
@@ -75,29 +75,47 @@ const MapSelector = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-navy-800 mb-2">
+      <main className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-8">
+        <div className="mb-6 text-center sm:mb-8">
+          <h2 className="mb-2 text-xl font-bold text-navy-800 sm:text-2xl">
             場所を選択してください
           </h2>
-          <p className="text-gray-600">
+          <p className="text-sm text-gray-600 sm:text-base">
             図面の該当場所をタップして選択してください
           </p>
         </div>
 
         {/* Selected Location Display */}
         {selectedLocation && (
-          <div className="bg-navy-600 text-white rounded-lg p-4 mb-6 text-center">
+          <div className="mb-4 rounded-lg bg-navy-600 p-4 text-center text-white sm:mb-6">
             <div className="flex items-center justify-center space-x-2">
               <MapPin className="w-6 h-6" />
-              <span className="text-xl font-bold">選択中：{selectedLocation}</span>
+              <span className="text-lg font-bold sm:text-xl">選択中：{selectedLocation}</span>
             </div>
           </div>
         )}
 
         {/* Map Container */}
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6">
-          <div className="relative mx-auto w-full max-w-[868px]">
+        <div className="mb-6 rounded-lg bg-white p-3 shadow-lg sm:p-6">
+          <div className="mb-4 grid grid-cols-6 gap-2 sm:hidden">
+            {locations.map((location) => (
+              <button
+                type="button"
+                key={location.id}
+                onClick={() => handleLocationSelect(location.id)}
+                className={`touch-target rounded-lg border text-sm font-semibold transition-colors ${
+                  selectedLocation === location.id
+                    ? 'border-blue-600 bg-blue-600 text-white'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-blue-400 hover:bg-blue-50'
+                }`}
+              >
+                {location.id}
+              </button>
+            ))}
+          </div>
+
+          <div className="-mx-3 overflow-x-auto px-3 pb-2 sm:mx-0 sm:px-0 scrollbar-soft">
+          <div className="relative mx-auto min-w-[620px] max-w-[868px] sm:min-w-0">
             {mapError ? (
               <div className="text-red-600 text-center p-8 border-2 border-red-300 rounded-lg">
                 <p className="text-lg font-semibold mb-2">map.png が見つかりません。</p>
@@ -140,6 +158,7 @@ const MapSelector = () => {
               </>
             )}
           </div>
+          </div>
         </div>
 
         {/* Action Buttons */}
@@ -172,7 +191,7 @@ const MapSelector = () => {
         </div>
 
         {/* Instructions */}
-        <div className="mt-8 bg-blue-50 rounded-lg p-4">
+        <div className="mt-6 rounded-lg bg-blue-50 p-4 sm:mt-8">
           <h3 className="font-medium text-blue-900 mb-2">使い方</h3>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• 図面上の A〜K のエリアをタップして場所を選択します</li>

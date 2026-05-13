@@ -56,6 +56,17 @@ const deliveryUpdatedDate = (delivery) => (
 const getItemName = (delivery) => delivery.item_name || delivery.materialName || delivery.material_name || '品名未設定';
 const getVendorName = (delivery) => delivery.vendor_name || delivery.vendorName || '';
 
+const formatJapaneseDate = (date) => {
+  const value = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(value.getTime())) return date || '';
+
+  return value.toLocaleDateString('ja-JP', {
+    month: 'numeric',
+    day: 'numeric',
+    weekday: 'short'
+  });
+};
+
 const isNotReceivedDelivery = (delivery, today) => {
   const scheduledDate = formatDate(delivery.scheduled_date || delivery.deliveryDate);
   return Boolean(
@@ -80,6 +91,67 @@ const dedupeLatestDeliveries = (sourceDeliveries = []) => {
   });
 
   return Array.from(latestById.values());
+};
+
+const MobileCalendarAgenda = ({ events, onEventClick }) => {
+  const sortedEvents = [...events]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 30);
+
+  if (sortedEvents.length === 0) {
+    return (
+      <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-8 text-center">
+        <Calendar className="mx-auto mb-2 h-10 w-10 text-gray-400" />
+        <p className="text-sm text-gray-500">表示できるカレンダー項目がありません</p>
+      </div>
+    );
+  }
+
+  const groupedEvents = sortedEvents.reduce((groups, event) => {
+    const key = event.date;
+    return {
+      ...groups,
+      [key]: [...(groups[key] || []), event]
+    };
+  }, {});
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg bg-navy-50 px-4 py-3">
+        <p className="text-sm font-medium text-navy-800">スマホでは日付ごとの一覧で表示しています</p>
+        <p className="mt-1 text-xs text-navy-600">項目をタップすると詳細を開きます</p>
+      </div>
+
+      {Object.entries(groupedEvents).map(([date, dateEvents]) => (
+        <section key={date} className="rounded-lg border border-gray-200 bg-white">
+          <div className="border-b border-gray-100 px-4 py-3">
+            <h3 className="text-sm font-semibold text-gray-800">{formatJapaneseDate(date)}</h3>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {dateEvents.map((event) => (
+              <button
+                type="button"
+                key={event.id}
+                onClick={() => onEventClick(event.extendedProps.deliveryId)}
+                className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-inset"
+              >
+                <span
+                  className="mt-1 h-3 w-3 flex-shrink-0 rounded-full"
+                  style={{ backgroundColor: event.backgroundColor }}
+                ></span>
+                <span className="min-w-0 flex-1">
+                  <span className="block break-words text-sm font-medium text-gray-900">{event.extendedProps.itemName}</span>
+                  <span className="mt-1 block text-xs text-gray-500">
+                    {event.extendedProps.vendorName || '業者未設定'} / {event.extendedProps.status}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
 };
 
 const AdminDashboard = () => {
@@ -265,7 +337,7 @@ const AdminDashboard = () => {
   };
 
   const getSummaryCardClass = (tabKey, colorClass) => (
-    `w-full bg-white rounded-lg shadow p-6 border-l-4 ${colorClass} text-left transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2 ${
+    `w-full bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 ${colorClass} text-left transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-navy-500 focus:ring-offset-2 ${
       activeTab === tabKey ? 'ring-2 ring-navy-200' : ''
     }`
   );
@@ -275,10 +347,10 @@ const AdminDashboard = () => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex min-h-16 flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-0">
             <button
               type="button"
-              className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+              className="flex min-w-0 items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
               onClick={() => navigate('/')}
               aria-label="トップへ戻る"
             >
@@ -290,8 +362,8 @@ const AdminDashboard = () => {
                 <p className="text-sm text-gray-500">造船部材リアルタイム管理システム</p>
               </div>
             </button>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
+            <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
+              <span className="min-w-0 truncate text-sm text-gray-600">
                 {selectedUser?.name}（管理者）
               </span>
               <button
@@ -299,7 +371,7 @@ const AdminDashboard = () => {
                   clearUser();
                   navigate('/');
                 }}
-                className="text-sm text-gray-500 hover:text-gray-700"
+                className="flex-shrink-0 text-sm text-gray-500 hover:text-gray-700"
               >
                 ログアウト
               </button>
@@ -309,9 +381,9 @@ const AdminDashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-8 lg:px-8">
         {/* Notifications */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:gap-6">
           <button
             type="button"
             onClick={() => handleSummaryClick('today')}
@@ -365,45 +437,55 @@ const AdminDashboard = () => {
         )}
 
         {/* Calendar */}
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="p-6">
+        <div className="mb-6 rounded-lg bg-white shadow sm:mb-8">
+          <div className="p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">カレンダー</h2>
-            <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              events={calendarEvents}
-              headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,dayGridWeek'
-              }}
-              height="auto"
-              eventClick={(info) => {
-                navigate(`/delivery/${info.event.extendedProps.deliveryId}`);
-              }}
-              dayCellClassNames={(dateInfo) => {
-                let classes = [];
-                
-                if (isWeekend(dateInfo.date)) {
-                  if (dateInfo.date.getDay() === 0) {
-                    classes.push('bg-red-50'); // 日曜日は薄い赤
-                  } else {
-                    classes.push('bg-blue-50'); // 土曜日は薄い青
+            <div className="md:hidden">
+              <MobileCalendarAgenda
+                events={calendarEvents}
+                onEventClick={(deliveryId) => {
+                  if (deliveryId) navigate(`/delivery/${deliveryId}`);
+                }}
+              />
+            </div>
+            <div className="hidden md:block">
+              <FullCalendar
+                plugins={[dayGridPlugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                events={calendarEvents}
+                headerToolbar={{
+                  left: 'prev,next today',
+                  center: 'title',
+                  right: 'dayGridMonth,dayGridWeek'
+                }}
+                height="auto"
+                eventClick={(info) => {
+                  navigate(`/delivery/${info.event.extendedProps.deliveryId}`);
+                }}
+                dayCellClassNames={(dateInfo) => {
+                  let classes = [];
+
+                  if (isWeekend(dateInfo.date)) {
+                    if (dateInfo.date.getDay() === 0) {
+                      classes.push('bg-red-50'); // 日曜日は薄い赤
+                    } else {
+                      classes.push('bg-blue-50'); // 土曜日は薄い青
+                    }
+                  } else if (isHoliday(dateInfo.date)) {
+                    classes.push('bg-red-50'); // 祝日は薄い赤
                   }
-                } else if (isHoliday(dateInfo.date)) {
-                  classes.push('bg-red-50'); // 祝日は薄い赤
-                }
-                
-                return classes;
-              }}
-              eventContent={(eventInfo) => {
-                return (
-                  <div className="p-1 leading-tight">
-                    <div className="text-xs font-semibold whitespace-normal">{eventInfo.event.title}</div>
-                  </div>
-                );
-              }}
-            />
+
+                  return classes;
+                }}
+                eventContent={(eventInfo) => {
+                  return (
+                    <div className="p-1 leading-tight">
+                      <div className="text-xs font-semibold whitespace-normal">{eventInfo.event.title}</div>
+                    </div>
+                  );
+                }}
+              />
+            </div>
           </div>
         </div>
 
@@ -416,7 +498,7 @@ const AdminDashboard = () => {
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`whitespace-nowrap py-4 px-6 text-sm font-medium border-b-2 ${
+                  className={`whitespace-nowrap px-4 py-4 text-sm font-medium border-b-2 sm:px-6 ${
                     activeTab === tab.key
                       ? 'border-navy-500 text-navy-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -429,7 +511,7 @@ const AdminDashboard = () => {
             </nav>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-navy-600 mx-auto"></div>
@@ -444,19 +526,19 @@ const AdminDashboard = () => {
                 {detailDeliveries.map((delivery) => (
                   <div
                     key={delivery.id || delivery.system_id}
-                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                    className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
                     onClick={() => navigate(`/delivery/${delivery.id}`)}
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getVendorColor(getVendorName(delivery), delivery.color_code) }}></div>
-                        <div>
-                          <p className="font-medium text-gray-900">{getItemName(delivery)}</p>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="h-3 w-3 flex-shrink-0 rounded-full" style={{ backgroundColor: getVendorColor(getVendorName(delivery), delivery.color_code) }}></div>
+                        <div className="min-w-0">
+                          <p className="break-words font-medium text-gray-900">{getItemName(delivery)}</p>
                           <p className="text-sm text-gray-500">{getVendorName(delivery)} - 場所: {delivery.current_location}</p>
                           <p className="text-xs text-gray-400">{getDetailDateText(delivery)}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4">
+                      <div className="flex flex-wrap items-center gap-3">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(delivery.status)}`}>
                           {delivery.status}
                         </span>
@@ -478,7 +560,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Menu */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 md:grid-cols-4 md:gap-4">
           <button
             onClick={() => navigate('/delivery-list')}
             className="flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"

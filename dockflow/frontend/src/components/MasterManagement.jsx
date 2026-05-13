@@ -127,11 +127,11 @@ const MasterManagement = () => {
           className="w-full h-10 rounded cursor-pointer"
         />
       </div>
-      <div className="flex space-x-3">
-        <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <button type="button" onClick={() => setShowForm(false)} className="btn-secondary sm:w-auto">
           キャンセル
         </button>
-        <button type="submit" className="btn-primary">
+        <button type="submit" className="btn-primary sm:w-auto">
           {editingItem ? '更新' : '追加'}
         </button>
       </div>
@@ -150,11 +150,11 @@ const MasterManagement = () => {
           className="input-field"
         />
       </div>
-      <div className="flex space-x-3">
-        <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <button type="button" onClick={() => setShowForm(false)} className="btn-secondary sm:w-auto">
           キャンセル
         </button>
-        <button type="submit" className="btn-primary">
+        <button type="submit" className="btn-primary sm:w-auto">
           {editingItem ? '更新' : '追加'}
         </button>
       </div>
@@ -163,9 +163,9 @@ const MasterManagement = () => {
 
   const renderVendors = () => (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-semibold text-gray-800">業者管理</h3>
-        <button onClick={handleAdd} className="btn-primary">
+        <button onClick={handleAdd} className="btn-primary sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           業者追加
         </button>
@@ -173,7 +173,42 @@ const MasterManagement = () => {
 
       {showForm && renderVendorForm()}
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="space-y-3 md:hidden">
+        {vendors.map((vendor) => (
+          <div key={vendor.id} className="rounded-lg bg-white p-4 shadow">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="break-words font-medium text-gray-900">{vendor.vendor_name}</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <div
+                    className="h-5 w-5 flex-shrink-0 rounded"
+                    style={{ backgroundColor: vendor.color_code }}
+                  ></div>
+                  <span className="text-sm text-gray-600">{vendor.color_code}</span>
+                </div>
+              </div>
+              <div className="flex flex-shrink-0 gap-1">
+                <button
+                  onClick={() => handleEdit(vendor)}
+                  className="touch-target rounded p-2 text-navy-600 hover:bg-navy-50"
+                  aria-label={`${vendor.vendor_name}を編集`}
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => handleDelete(vendor.id, 'vendor')}
+                  className="touch-target rounded p-2 text-red-600 hover:bg-red-50"
+                  aria-label={`${vendor.vendor_name}を削除`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-lg bg-white shadow md:block">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -221,9 +256,9 @@ const MasterManagement = () => {
 
   const renderItems = () => (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-semibold text-gray-800">品名管理</h3>
-        <button onClick={handleAdd} className="btn-primary">
+        <button onClick={handleAdd} className="btn-primary sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           品名追加
         </button>
@@ -231,7 +266,31 @@ const MasterManagement = () => {
 
       {showForm && renderItemForm()}
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="space-y-3 md:hidden">
+        {items.map((item) => (
+          <div key={item.id} className="flex items-center justify-between gap-3 rounded-lg bg-white p-4 shadow">
+            <p className="min-w-0 break-words font-medium text-gray-900">{item.item_name}</p>
+            <div className="flex flex-shrink-0 gap-1">
+              <button
+                onClick={() => handleEdit(item)}
+                className="touch-target rounded p-2 text-navy-600 hover:bg-navy-50"
+                aria-label={`${item.item_name}を編集`}
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => handleDelete(item.id, 'item')}
+                className="touch-target rounded p-2 text-red-600 hover:bg-red-50"
+                aria-label={`${item.item_name}を削除`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-lg bg-white shadow md:block">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -273,7 +332,26 @@ const MasterManagement = () => {
         <h3 className="text-lg font-semibold text-gray-800">ユーザー管理</h3>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="space-y-3 md:hidden">
+        {users.map((user) => (
+          <div key={user.id} className="rounded-lg bg-white p-4 shadow">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="break-words font-medium text-gray-900">{user.name}</p>
+                <p className="mt-1 break-words text-sm text-gray-500">{user.email || '-'}</p>
+              </div>
+              <span className={`flex-shrink-0 rounded-full px-2 py-1 text-xs font-medium ${
+                user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+              }`}>
+                {user.role === 'admin' ? '管理者' : '納入業者'}
+              </span>
+            </div>
+            <p className="text-sm text-gray-600">業者: {user.vendor_id || '-'}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-lg bg-white shadow md:block">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -302,7 +380,7 @@ const MasterManagement = () => {
         </table>
       </div>
 
-      <div className="bg-blue-50 rounded-lg p-4">
+      <div className="rounded-lg bg-blue-50 p-4">
         <h4 className="font-medium text-blue-900 mb-2">ユーザー管理について</h4>
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• 現在、ユーザーの追加・編集・削除機能は実装されていません</li>
@@ -326,18 +404,18 @@ const MasterManagement = () => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex min-h-16 items-center py-3 sm:py-0">
             <div className="flex items-center">
               <button
                 onClick={handleBack}
-                className="mr-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="touch-target mr-2 rounded-lg p-2 transition-colors hover:bg-gray-100 sm:mr-3"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+                className="flex min-w-0 items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
                 aria-label="トップへ戻る"
               >
                 <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
@@ -354,16 +432,16 @@ const MasterManagement = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-navy-800 mb-6">マスタ管理</h2>
+      <main className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="mb-4 text-xl font-bold text-navy-800 sm:mb-6 sm:text-2xl">マスタ管理</h2>
 
           {/* Tabs */}
           <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
+            <nav className="-mb-px flex overflow-x-auto scrollbar-soft">
               <button
                 onClick={() => setActiveTab('vendors')}
-                className={`py-4 px-6 text-sm font-medium border-b-2 flex items-center space-x-2 ${
+                className={`flex items-center space-x-2 whitespace-nowrap border-b-2 px-4 py-4 text-sm font-medium sm:px-6 ${
                   activeTab === 'vendors'
                     ? 'border-navy-500 text-navy-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -374,7 +452,7 @@ const MasterManagement = () => {
               </button>
               <button
                 onClick={() => setActiveTab('items')}
-                className={`py-4 px-6 text-sm font-medium border-b-2 flex items-center space-x-2 ${
+                className={`flex items-center space-x-2 whitespace-nowrap border-b-2 px-4 py-4 text-sm font-medium sm:px-6 ${
                   activeTab === 'items'
                     ? 'border-navy-500 text-navy-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -385,7 +463,7 @@ const MasterManagement = () => {
               </button>
               <button
                 onClick={() => setActiveTab('users')}
-                className={`py-4 px-6 text-sm font-medium border-b-2 flex items-center space-x-2 ${
+                className={`flex items-center space-x-2 whitespace-nowrap border-b-2 px-4 py-4 text-sm font-medium sm:px-6 ${
                   activeTab === 'users'
                     ? 'border-navy-500 text-navy-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'

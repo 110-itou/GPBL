@@ -124,18 +124,18 @@ const DeliveryDetail = () => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex min-h-16 items-center py-3 sm:py-0">
             <div className="flex items-center">
               <button
                 onClick={handleBack}
-                className="mr-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="touch-target mr-2 rounded-lg p-2 transition-colors hover:bg-gray-100 sm:mr-3"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+                className="flex min-w-0 items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
                 aria-label="トップへ戻る"
               >
                 <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
@@ -152,16 +152,16 @@ const DeliveryDetail = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-8">
         {/* Title and Actions */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-navy-800">
+        <div className="mb-6 sm:mb-8">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="break-words text-xl font-bold text-navy-800 sm:text-2xl">
               {delivery.item_name}
             </h2>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded-full" style={{ backgroundColor: delivery.color_code }}></div>
-              <span className="text-sm text-gray-600">{delivery.vendor_name}</span>
+            <div className="flex min-w-0 items-center space-x-2">
+              <div className="h-4 w-4 flex-shrink-0 rounded-full" style={{ backgroundColor: delivery.color_code }}></div>
+              <span className="truncate text-sm text-gray-600">{delivery.vendor_name}</span>
             </div>
           </div>
           
@@ -178,19 +178,19 @@ const DeliveryDetail = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
             {canEdit && (
               <>
                 <button
                   onClick={handleEdit}
-                  className="btn-primary"
+                  className="btn-primary w-full sm:w-auto"
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   編集
                 </button>
                 <button
                   onClick={handleLocationChange}
-                  className="btn-secondary"
+                  className="btn-secondary w-full sm:w-auto"
                 >
                   <MapPin className="w-4 h-4 mr-2" />
                   場所変更
@@ -200,7 +200,7 @@ const DeliveryDetail = () => {
             {selectedUser?.role === 'admin' && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="btn-danger"
+                className="btn-danger w-full sm:w-auto"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 削除
@@ -212,7 +212,7 @@ const DeliveryDetail = () => {
         {/* Detail Information */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Basic Information */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <Package className="w-5 h-5 mr-2" />
               基本情報
@@ -253,7 +253,7 @@ const DeliveryDetail = () => {
           </div>
 
           {/* Date Information */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <Calendar className="w-5 h-5 mr-2" />
               日付情報
@@ -290,7 +290,7 @@ const DeliveryDetail = () => {
 
         {/* Memo */}
         {delivery.memo && (
-          <div className="bg-white rounded-lg shadow p-6 mt-6">
+          <div className="mt-6 rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <FileText className="w-5 h-5 mr-2" />
               メモ
@@ -301,7 +301,7 @@ const DeliveryDetail = () => {
 
         {/* Attachments */}
         {attachments.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6 mt-6">
+          <div className="mt-6 rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <File className="w-5 h-5 mr-2" />
               添付ファイル
@@ -309,9 +309,9 @@ const DeliveryDetail = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {attachments.map((attachment) => (
                 <div key={attachment.id} className="border border-gray-200 rounded-lg p-3">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex min-w-0 items-center space-x-3">
                     <AttachmentPreview attachment={attachment} />
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {attachment.file_name}
                       </p>
@@ -336,20 +336,20 @@ const DeliveryDetail = () => {
 
         {/* Movement History */}
         {movementLogs.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6 mt-6">
+          <div className="mt-6 rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <History className="w-5 h-5 mr-2" />
               移動履歴
             </h3>
             <div className="space-y-3">
               {movementLogs.map((log, index) => (
-                <div key={log.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-navy-100 rounded-full flex items-center justify-center">
+                <div key={log.id} className="flex flex-col gap-3 border-b border-gray-100 py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center space-x-3">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-navy-100">
                       <MapPin className="w-4 h-4 text-navy-600" />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
+                    <div className="min-w-0">
+                      <p className="break-words text-sm font-medium text-gray-900">
                         {log.before_location ? `場所 ${log.before_location} → ${log.after_location}` : `場所 ${log.after_location} に配置`}
                       </p>
                       <p className="text-xs text-gray-500">

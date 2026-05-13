@@ -105,18 +105,18 @@ const LocationChange = () => {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex min-h-16 items-center py-3 sm:py-0">
             <div className="flex items-center">
               <button
                 onClick={handleBack}
-                className="mr-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="touch-target mr-2 rounded-lg p-2 transition-colors hover:bg-gray-100 sm:mr-3"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+                className="flex min-w-0 items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
                 aria-label="トップへ戻る"
               >
                 <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
@@ -133,21 +133,21 @@ const LocationChange = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-navy-800 mb-2">
+      <main className="mx-auto max-w-4xl px-3 py-4 sm:px-4 sm:py-8">
+        <div className="mb-6 text-center sm:mb-8">
+          <h2 className="mb-2 text-xl font-bold text-navy-800 sm:text-2xl">
             場所変更
           </h2>
-          <div className="bg-gray-100 rounded-lg p-3 inline-block mb-4">
+          <div className="mb-4 inline-flex max-w-full flex-col gap-1 rounded-lg bg-gray-100 p-3 text-sm sm:inline-block sm:text-base">
             <span className="font-medium text-gray-700">{delivery.item_name}</span>
-            <span className="mx-2 text-gray-500">|</span>
+            <span className="mx-2 hidden text-gray-500 sm:inline">|</span>
             <span className="font-medium text-gray-700">現在の場所: {delivery.current_location}</span>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Current Location */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">現在の場所</h3>
             <div className="flex items-center justify-center">
               <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center border-2 border-gray-400">
@@ -157,20 +157,46 @@ const LocationChange = () => {
           </div>
 
           {/* Map Selection */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">新しい場所を選択</h3>
             
             {/* Selected Location Display */}
             {selectedLocation && selectedLocation !== delivery.current_location && (
-              <div className="bg-green-600 text-white rounded-lg p-4 mb-6 text-center">
+              <div className="mb-4 rounded-lg bg-green-600 p-4 text-center text-white sm:mb-6">
                 <div className="flex items-center justify-center space-x-2">
                   <MapPin className="w-6 h-6" />
-                  <span className="text-xl font-bold">新しい場所：{selectedLocation}</span>
+                  <span className="text-lg font-bold sm:text-xl">新しい場所：{selectedLocation}</span>
                 </div>
               </div>
             )}
 
-            <div className="relative mx-auto w-full max-w-[868px]">
+            <div className="mb-4 grid grid-cols-6 gap-2 sm:hidden">
+              {locations.map((location) => {
+                const isCurrentLocation = location.id === delivery.current_location;
+                const isSelectedLocation = location.id === selectedLocation;
+
+                return (
+                  <button
+                    type="button"
+                    key={location.id}
+                    onClick={() => handleLocationSelect(location.id)}
+                    disabled={isCurrentLocation}
+                    className={`touch-target rounded-lg border text-sm font-semibold transition-colors ${
+                      isCurrentLocation
+                        ? 'cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400'
+                        : isSelectedLocation
+                        ? 'border-green-600 bg-green-600 text-white'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-green-500 hover:bg-green-50'
+                    }`}
+                  >
+                    {location.id}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="-mx-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0 scrollbar-soft">
+            <div className="relative mx-auto min-w-[620px] max-w-[868px] sm:min-w-0">
               <img
                 src={mapImage}
                 alt="保管場所図面"
@@ -209,6 +235,7 @@ const LocationChange = () => {
                 );
               })}
             </div>
+            </div>
 
             <div className="mt-4 text-sm text-gray-600">
               <p>• 現在の場所は灰色で表示されています</p>
@@ -218,14 +245,14 @@ const LocationChange = () => {
           </div>
 
           {/* Move Memo */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="rounded-lg bg-white p-4 shadow sm:p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">移動メモ</h3>
             <textarea
               value={moveMemo}
               onChange={(e) => setMoveMemo(e.target.value)}
               placeholder="移動の理由や特記事項があれば入力してください（任意）"
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-500"
+              className="input-field"
             />
           </div>
 
@@ -263,7 +290,7 @@ const LocationChange = () => {
         </form>
 
         {/* Instructions */}
-        <div className="mt-8 bg-blue-50 rounded-lg p-4">
+        <div className="mt-6 rounded-lg bg-blue-50 p-4 sm:mt-8">
           <h3 className="font-medium text-blue-900 mb-2">場所変更について</h3>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• 場所の変更は社内の担当者が行うことを想定しています</li>

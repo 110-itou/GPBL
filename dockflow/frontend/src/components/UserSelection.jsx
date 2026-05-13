@@ -4,6 +4,11 @@ import { useUser } from '../contexts/UserContext';
 import { PackageCheck, ShieldCheck } from 'lucide-react';
 import yanoLogo from '../assets/yano-logo.png';
 
+const FALLBACK_USERS = {
+  admin: { id: 1, name: '田中 管理者', role: 'admin' },
+  vendor: { id: 2, name: '山田 納入業者', role: 'vendor' }
+};
+
 const UserSelection = () => {
   const navigate = useNavigate();
   const { users, selectUser } = useUser();
@@ -20,9 +25,7 @@ const UserSelection = () => {
   };
 
   const handleDirectNavigation = (role) => {
-    const user = role === 'admin' 
-      ? { id: 1, name: '田中 管理者', role: 'admin' }
-      : { id: 2, name: '山田 納入業者', role: 'vendor' };
+    const user = users.find((apiUser) => apiUser.role === role) || FALLBACK_USERS[role];
     selectUser(user);
     setTimeout(() => {
       navigate(`/${role}`);

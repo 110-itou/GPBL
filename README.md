@@ -115,7 +115,7 @@ CLOUDINARY_API_SECRET=
 補足:
 
 - `server.js` の既定ポートは `5001` です。
-- `.env` で `PORT=5000` を指定する場合は、フロントエンドの `VITE_API_URL` も `http://localhost:5000/api` に合わせます。
+- `.env` で `PORT` を変える場合は、`dockflow/frontend/vite.config.js` のプロキシ先、またはフロントエンドの `VITE_API_URL` も同じポートに合わせます。
 - `npm run migrate` はテーブル作成のみです。
 - `npm run seed` は既存データを削除してサンプルデータを投入します。
 
@@ -131,10 +131,10 @@ npm run dev
 `dockflow/frontend/.env` の例:
 
 ```env
-VITE_API_URL=http://localhost:5001/api
+VITE_API_URL=/api
 ```
 
-起動後は通常 `http://localhost:3000` を開きます。
+起動後は通常 `http://localhost:3000` を開きます。`VITE_API_URL=/api` の場合は、Viteの開発プロキシが `http://localhost:5001` に転送します。
 
 ## 開発時によく使うコマンド
 
@@ -167,7 +167,7 @@ VITE_API_URL=http://localhost:5001/api
 
 ## API概要
 
-APIのベースURLはローカル標準で `http://localhost:5001/api` です。
+APIのベースURLはフロントエンドからは通常 `/api` です。ローカル開発ではViteのプロキシが `http://localhost:5001/api` に転送します。
 
 | メソッド | パス | 内容 |
 | --- | --- | --- |
@@ -231,7 +231,7 @@ APIのベースURLはローカル標準で `http://localhost:5001/api` です。
 
 | 変数 | 必須 | 内容 |
 | --- | --- | --- |
-| `VITE_API_URL` | 推奨 | APIベースURL。未指定時は `http://localhost:5001/api` |
+| `VITE_API_URL` | 任意 | APIベースURL。未指定時は `/api` |
 | `VITE_CLOUDINARY_CLOUD_NAME` | 添付アップロードで必要 | Cloudinary cloud name |
 | `VITE_CLOUDINARY_API_KEY` | 現状は設定判定に使用 | Cloudinary API key |
 | `VITE_CLOUDINARY_API_SECRET` | 現状は設定判定に使用 | Cloudinary API secret |
@@ -243,8 +243,8 @@ APIのベースURLはローカル標準で `http://localhost:5001/api` です。
 - まず `dockflow/backend/server.js` と `dockflow/frontend/src/services/api.js` の対応関係を確認すると、API変更の影響範囲を追いやすいです。
 - 画面追加やルート変更は `dockflow/frontend/src/App.jsx` に集約されています。
 - 選択ユーザーは `UserContext.jsx` が `localStorage` に保存しています。認証・認可はまだサーバー側にありません。
-- `UserContext.jsx` は `/api/users` を呼びますが、現状はレスポンスではなく固定のフォールバックユーザーをセットしています。実ユーザー連携を触る場合はここを確認してください。
-- `AdminDashboard.jsx` はAPI取得に失敗するとデモデータを表示します。API不調でも画面が動いて見えるため、検証時はブラウザコンソールとNetworkタブも確認してください。
+- `UserContext.jsx` は `/api/users` を優先し、取得できない場合だけ固定のフォールバックユーザーを使います。
+- `AdminDashboard.jsx` は `/api/calendar` をカレンダー表示に使い、API取得に失敗した場合はデモデータではなくエラー表示と空データにします。
 - 添付ファイル登録は設計途中です。`DeliveryRegistration.jsx` にはアップロードUIがありますが、登録時の実アップロード処理はTODOのままです。
 - 論理削除は `deleted_at` を使います。APIの一覧取得は基本的に `deleted_at IS NULL` を条件にしています。
 - `seed.js` は `DELETE FROM` で関連テーブルの既存データを消します。本番DBや共有DBでは実行しないでください。
@@ -257,9 +257,9 @@ Renderへのデプロイ手順は [dockflow/DEPLOYMENT.md](dockflow/DEPLOYMENT.m
 概要:
 
 - PostgreSQLサービス `dockflow-db` を作成します。
-- バックエンドは `dockflow/backend` をRoot Directoryとして、`npm install && npm run migrate` でビルドし、`npm start` で起動します。
+- バックエンドは `dockflow/backend` をRoot Directoryとして、`npm install` でビルドし、Pre-Deploy Commandの `npm run migrate` を実行してから `npm start` で起動します。
 - フロントエンドは `dockflow/frontend` をRoot Directoryとして、`npm install && npm run build` でビルドし、`dist` を公開します。
-- フロントエンドの `VITE_API_URL` はデプロイ済みバックエンドの `/api` に向けます。
+- フロントエンドの `VITE_API_URL` は `/api` にして、Renderのrewriteでバックエンドへ転送します。
 
 ## 既知の注意点
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { getDashboardSummary, getDeliveries, exportDeliveriesCSV } from '../services/api';
+import { getCalendarData, getDashboardSummary, getDeliveries, exportDeliveriesCSV } from '../services/api';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -56,97 +56,7 @@ const deliveryUpdatedDate = (delivery) => (
 const getItemName = (delivery) => delivery.item_name || delivery.materialName || delivery.material_name || '品名未設定';
 const getVendorName = (delivery) => delivery.vendor_name || delivery.vendorName || '';
 
-const dateWithOffset = (offsetDays, time = '09:00:00') => {
-  const date = new Date();
-  date.setDate(date.getDate() + offsetDays);
-  return `${formatDate(date)}T${time}`;
-};
-
-const buildDemoDeliveries = () => [
-  {
-    id: 9001,
-    system_id: 'DEMO-9001',
-    item_name: '鋼板 A-1234',
-    vendor_name: '山田鉄工株式会社',
-    color_code: '#3b82f6',
-    status: '納入予定',
-    current_location: 'A',
-    quantity: 50,
-    scheduled_date: formatDate(new Date()),
-    updated_at: dateWithOffset(0, '09:00:00'),
-    created_at: dateWithOffset(-4, '09:00:00')
-  },
-  {
-    id: 9001,
-    system_id: 'DEMO-9001',
-    item_name: '鋼板 A-1234',
-    vendor_name: '山田鉄工株式会社',
-    color_code: '#3b82f6',
-    status: '移動済',
-    current_location: 'K',
-    quantity: 50,
-    scheduled_date: formatDate(new Date()),
-    updated_at: dateWithOffset(-1, '15:30:00'),
-    created_at: dateWithOffset(-4, '09:00:00')
-  },
-  {
-    id: 9002,
-    system_id: 'DEMO-9002',
-    item_name: '配管パイプ B-5678',
-    vendor_name: '佐藤金属工業',
-    color_code: '#10b981',
-    status: '納入済',
-    current_location: 'B',
-    quantity: 18,
-    scheduled_date: formatDate(new Date()),
-    received_date: formatDate(new Date()),
-    updated_at: dateWithOffset(0, '10:15:00'),
-    created_at: dateWithOffset(-2, '11:00:00')
-  },
-  {
-    id: 9003,
-    system_id: 'DEMO-9003',
-    item_name: 'ボルトナットセット C-9012',
-    vendor_name: '鈴木製作所',
-    color_code: '#f97316',
-    status: '移動済',
-    current_location: 'C',
-    quantity: 200,
-    scheduled_date: formatDate(new Date()),
-    received_date: formatDate(new Date()),
-    updated_at: dateWithOffset(1, '14:00:00'),
-    created_at: dateWithOffset(-3, '13:00:00')
-  },
-  {
-    id: 9004,
-    system_id: 'DEMO-9004',
-    item_name: 'ポンプ P-204',
-    vendor_name: '山田鉄工株式会社',
-    color_code: '#3b82f6',
-    status: '使用済',
-    current_location: 'D',
-    quantity: 4,
-    scheduled_date: formatDate(new Date()),
-    received_date: formatDate(new Date()),
-    updated_at: dateWithOffset(3, '08:45:00'),
-    created_at: dateWithOffset(-6, '10:00:00')
-  },
-  {
-    id: 9005,
-    system_id: 'DEMO-9005',
-    item_name: '電装品 E-7890',
-    vendor_name: '佐藤金属工業',
-    color_code: '#10b981',
-    status: '納入予定',
-    current_location: 'E',
-    quantity: 9,
-    scheduled_date: formatDate(new Date()),
-    updated_at: dateWithOffset(4, '16:00:00'),
-    created_at: dateWithOffset(-1, '16:00:00')
-  }
-];
-
-const dedupeLatestDeliveries = (sourceDeliveries) => {
+const dedupeLatestDeliveries = (sourceDeliveries = []) => {
   const latestById = new Map();
 
   sourceDeliveries.forEach((delivery) => {
@@ -171,6 +81,7 @@ const AdminDashboard = () => {
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [activeTab, setActiveTab] = useState('today');
   const [loading, setLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState('');
 
   const isWeekend = (date) => {
     const day = date.getDay();
@@ -195,10 +106,16 @@ const AdminDashboard = () => {
     };
   };
 
+  const normalizeSummary = (summaryData, fallbackSummary) => ({
+    scheduled_today: Number(summaryData?.scheduled_today ?? fallbackSummary.scheduled_today),
+    not_received: Number(summaryData?.not_received ?? fallbackSummary.not_received),
+    updated_today: Number(summaryData?.updated_today ?? fallbackSummary.updated_today)
+  });
+
   const buildCalendarEvents = (sourceDeliveries) => {
     return dedupeLatestDeliveries(sourceDeliveries)
       .map((delivery) => {
-        const eventDate = formatDate(deliveryUpdatedDate(delivery));
+        const eventDate = formatDate(delivery.event_date || deliveryUpdatedDate(delivery));
         if (!eventDate) return null;
 
         const vendorColor = getVendorColor(getVendorName(delivery), delivery.color_code);
@@ -227,21 +144,44 @@ const AdminDashboard = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [summaryRes, deliveriesRes] = await Promise.all([
+      setDashboardError('');
+
+      const [summaryResult, deliveriesResult, calendarResult] = await Promise.allSettled([
         getDashboardSummary(),
-        getDeliveries()
+        getDeliveries(),
+        getCalendarData()
       ]);
 
-      const latestDeliveries = dedupeLatestDeliveries(deliveriesRes.data || []);
-      setSummary(summaryRes.data || calculateSummary(latestDeliveries));
+      const deliveryRows = deliveriesResult.status === 'fulfilled' && Array.isArray(deliveriesResult.value.data)
+        ? deliveriesResult.value.data
+        : [];
+      const latestDeliveries = dedupeLatestDeliveries(deliveryRows);
+      const fallbackSummary = calculateSummary(latestDeliveries);
+      const summaryData = summaryResult.status === 'fulfilled'
+        ? normalizeSummary(summaryResult.value.data, fallbackSummary)
+        : fallbackSummary;
+      const calendarRows = calendarResult.status === 'fulfilled' && Array.isArray(calendarResult.value.data)
+        ? calendarResult.value.data
+        : latestDeliveries;
+      const failedApis = [
+        summaryResult.status === 'rejected' ? 'ダッシュボード集計' : null,
+        deliveriesResult.status === 'rejected' ? '納入一覧' : null,
+        calendarResult.status === 'rejected' ? 'カレンダー' : null
+      ].filter(Boolean);
+
+      setSummary(summaryData);
       setDeliveries(latestDeliveries);
-      setCalendarEvents(buildCalendarEvents(latestDeliveries));
+      setCalendarEvents(buildCalendarEvents(calendarRows));
+
+      if (failedApis.length > 0) {
+        setDashboardError(`${failedApis.join('、')}APIの取得に失敗しました。バックエンドの状態とVITE_API_URLを確認してください。`);
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-      const demoDeliveries = dedupeLatestDeliveries(buildDemoDeliveries());
-      setSummary(calculateSummary(demoDeliveries));
-      setDeliveries(demoDeliveries);
-      setCalendarEvents(buildCalendarEvents(demoDeliveries));
+      setSummary(calculateSummary([]));
+      setDeliveries([]);
+      setCalendarEvents([]);
+      setDashboardError('APIの取得に失敗しました。バックエンドに接続できないため、本番データを表示できません。');
     } finally {
       setLoading(false);
     }
@@ -344,6 +284,12 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
+
+        {dashboardError && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {dashboardError}
+          </div>
+        )}
 
         {/* Calendar */}
         <div className="bg-white rounded-lg shadow mb-8">

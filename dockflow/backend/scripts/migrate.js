@@ -8,6 +8,8 @@ const pool = new Pool({
 });
 
 const createTables = async () => {
+  let failed = false;
+
   try {
     console.log('Starting database migration...');
 
@@ -105,9 +107,13 @@ const createTables = async () => {
 
     console.log('Database migration completed successfully!');
   } catch (error) {
+    failed = true;
     console.error('Migration error:', error);
   } finally {
     await pool.end();
+    if (failed) {
+      process.exitCode = 1;
+    }
   }
 };
 

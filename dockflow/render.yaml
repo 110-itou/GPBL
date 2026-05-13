@@ -4,7 +4,8 @@ services:
     name: dockflow-api-backend
     runtime: node
     rootDir: dockflow/backend
-    buildCommand: npm install && npm run migrate
+    buildCommand: npm install
+    preDeployCommand: npm run migrate
     startCommand: npm start
     plan: free
     envVars:
@@ -33,7 +34,7 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        value: https://dockflow-api-backend.onrender.com/api
+        value: /api
     routes:
       - type: rewrite
         source: /api/*

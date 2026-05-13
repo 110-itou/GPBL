@@ -32,10 +32,11 @@ git push -u origin main
 1. Renderダッシュボードで「New +」→「Web Service」を選択
 2. GitHubリポジトリを接続
 3. 設定：
-   - Name: `dockflow-backend`
-   - Root Directory: `backend`
+   - Name: `dockflow-api-backend`
+   - Root Directory: `dockflow/backend`
    - Runtime: `Node`
-   - Build Command: `npm install && npm run migrate`
+   - Build Command: `npm install`
+   - Pre-Deploy Command: `npm run migrate`
    - Start Command: `npm start`
    - Health Check Path: `/api/health`
 
@@ -53,22 +54,22 @@ CLOUDINARY_API_SECRET=[任意]
 ### ステップ4: フロントエンドデプロイ
 1. 別のWeb Serviceを作成
 2. 設定：
-   - Name: `dockflow-frontend`
-   - Root Directory: `frontend`
+   - Name: `dockflow-api-frontend`
+   - Root Directory: `dockflow/frontend`
    - Runtime: `Static`
    - Build Command: `npm install && npm run build`
    - Publish Directory: `dist`
 
 ### ステップ5: フロントエンド環境変数
 ```
-VITE_API_URL=https://dockflow-backend.onrender.com/api
+VITE_API_URL=/api
 ```
 
 ### ステップ6: ルーティング設定
 フロントエンドサービスの「Rewrite Rules」で：
 ```
 Source: /api/*
-Destination: https://dockflow-backend.onrender.com/api/*
+Destination: https://dockflow-api-backend.onrender.com/api/*
 Type: Rewrite
 
 Source: /*
@@ -91,9 +92,10 @@ Type: Rewrite
 - SSLモードを確認
 
 ### 問題3: APIリクエストが失敗
-**原因**: CORSまたはルーティングの問題
+**原因**: バックエンド停止、DB接続エラー、またはルーティングの問題
 **解決策**:
-- フロントエンドの`VITE_API_URL`を確認
+- フロントエンドの`VITE_API_URL`が`/api`になっているか確認
+- バックエンドの`/api/health`で`database: connected`が返るか確認
 - バックエンドのCORS設定を確認
 
 ### 問題4: ホワイトスクリーン
@@ -113,12 +115,12 @@ Type: Rewrite
 - [ ] フロントエンドからバックエンドAPIにアクセスできる
 - [ ] データベースマイグレーションが実行されている
 
-## 🌐 アクス方法
+## 🌐 アクセス方法
 
 デプロイ完了後：
-- フロントエンド: `https://dockflow-frontend.onrender.com`
-- バックエンドAPI: `https://dockflow-backend.onrender.com/api`
-- APIヘルスチェック: `https://dockflow-backend.onrender.com/api/health`
+- フロントエンド: `https://dockflow-api-frontend.onrender.com`
+- バックエンドAPI: `https://dockflow-api-backend.onrender.com/api`
+- APIヘルスチェック: `https://dockflow-api-backend.onrender.com/api/health`
 
 ## 🔄 自動デプロイ設定
 

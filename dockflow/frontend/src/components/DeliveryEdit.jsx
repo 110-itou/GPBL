@@ -158,13 +158,20 @@ const DeliveryEdit = () => {
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
-                <span className="text-white font-bold">DF</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-navy-800">DockFlow</h1>
-                <p className="text-sm text-gray-500">造船部材リアルタイム管理システム</p>
-              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+                aria-label="トップへ戻る"
+              >
+                <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-white font-bold">DF</span>
+                </div>
+                <div className="text-left">
+                  <h1 className="text-xl font-bold text-navy-800">DockFlow</h1>
+                  <p className="text-sm text-gray-500">造船部材リアルタイム管理システム</p>
+                </div>
+              </button>
             </div>
           </div>
         </div>

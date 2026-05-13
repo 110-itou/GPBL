@@ -8,7 +8,7 @@ const { cloudinary, uploadFilesFallback } = require('./middleware/upload');
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors());
@@ -396,7 +396,8 @@ app.get('/api/calendar', async (req, res) => {
       SELECT 
         d.id,
         d.system_id,
-        d.scheduled_date,
+        d.updated_at::date AS event_date,
+        d.updated_at,
         d.status,
         d.current_location,
         i.item_name,
@@ -405,8 +406,8 @@ app.get('/api/calendar', async (req, res) => {
       FROM deliveries d
       LEFT JOIN item_master i ON d.item_id = i.id
       LEFT JOIN vendors v ON d.vendor_id = v.id
-      WHERE d.deleted_at IS NULL AND d.scheduled_date IS NOT NULL
-      ORDER BY d.scheduled_date
+      WHERE d.deleted_at IS NULL
+      ORDER BY d.updated_at DESC
     `);
     res.json(result.rows);
   } catch (error) {

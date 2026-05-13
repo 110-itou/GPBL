@@ -5,8 +5,163 @@ import { getDashboardSummary, getDeliveries, exportDeliveriesCSV } from '../serv
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { Calendar, Package, AlertCircle, RefreshCw, Users, Settings, Download, Search, Plus } from 'lucide-react';
-import { dummyDeliveries, dummyCalendarEvents, dummyNotifications } from '../data/dummyData';
+import { Calendar, Package, AlertCircle, RefreshCw, Settings, Download, Search, Plus } from 'lucide-react';
+
+const VENDOR_COLOR_OVERRIDES = [
+  { keyword: '山田鉄工', color: '#3b82f6' },
+  { keyword: '山田', color: '#3b82f6' },
+  { keyword: '佐藤金属', color: '#10b981' },
+  { keyword: '佐藤', color: '#10b981' },
+  { keyword: '鈴木製作所', color: '#f97316' },
+  { keyword: '鈴木', color: '#f97316' }
+];
+
+const JAPAN_HOLIDAYS = new Set([
+  '2024-01-01', '2024-01-08', '2024-02-11', '2024-02-12', '2024-02-23', '2024-03-20',
+  '2024-04-29', '2024-05-03', '2024-05-04', '2024-05-05', '2024-05-06', '2024-07-15',
+  '2024-08-11', '2024-08-12', '2024-09-16', '2024-09-22', '2024-09-23', '2024-10-14',
+  '2024-11-03', '2024-11-04', '2024-11-23',
+  '2025-01-01', '2025-01-13', '2025-02-11', '2025-02-23', '2025-02-24', '2025-03-20',
+  '2025-04-29', '2025-05-03', '2025-05-04', '2025-05-05', '2025-05-06', '2025-07-21',
+  '2025-08-11', '2025-09-15', '2025-09-23', '2025-10-13', '2025-11-03', '2025-11-23',
+  '2025-11-24',
+  '2026-01-01', '2026-01-12', '2026-02-11', '2026-02-23', '2026-03-20', '2026-04-29',
+  '2026-05-03', '2026-05-04', '2026-05-05', '2026-05-06', '2026-07-20', '2026-08-11',
+  '2026-09-21', '2026-09-22', '2026-09-23', '2026-10-12', '2026-11-03', '2026-11-23'
+]);
+
+const formatDate = (date) => {
+  if (!date) return '';
+  const value = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(value.getTime())) {
+    return typeof date === 'string' ? date.split('T')[0] : '';
+  }
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const deliveryUpdatedDate = (delivery) => (
+  delivery.updated_at ||
+  delivery.updatedAt ||
+  delivery.received_date ||
+  delivery.receivedDate ||
+  delivery.scheduled_date ||
+  delivery.deliveryDate ||
+  delivery.created_at ||
+  delivery.createdAt
+);
+
+const getItemName = (delivery) => delivery.item_name || delivery.materialName || delivery.material_name || '品名未設定';
+const getVendorName = (delivery) => delivery.vendor_name || delivery.vendorName || '';
+
+const dateWithOffset = (offsetDays, time = '09:00:00') => {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  return `${formatDate(date)}T${time}`;
+};
+
+const buildDemoDeliveries = () => [
+  {
+    id: 9001,
+    system_id: 'DEMO-9001',
+    item_name: '鋼板 A-1234',
+    vendor_name: '山田鉄工株式会社',
+    color_code: '#3b82f6',
+    status: '納入予定',
+    current_location: 'A',
+    quantity: 50,
+    scheduled_date: formatDate(new Date()),
+    updated_at: dateWithOffset(0, '09:00:00'),
+    created_at: dateWithOffset(-4, '09:00:00')
+  },
+  {
+    id: 9001,
+    system_id: 'DEMO-9001',
+    item_name: '鋼板 A-1234',
+    vendor_name: '山田鉄工株式会社',
+    color_code: '#3b82f6',
+    status: '移動済',
+    current_location: 'K',
+    quantity: 50,
+    scheduled_date: formatDate(new Date()),
+    updated_at: dateWithOffset(-1, '15:30:00'),
+    created_at: dateWithOffset(-4, '09:00:00')
+  },
+  {
+    id: 9002,
+    system_id: 'DEMO-9002',
+    item_name: '配管パイプ B-5678',
+    vendor_name: '佐藤金属工業',
+    color_code: '#10b981',
+    status: '納入済',
+    current_location: 'B',
+    quantity: 18,
+    scheduled_date: formatDate(new Date()),
+    received_date: formatDate(new Date()),
+    updated_at: dateWithOffset(0, '10:15:00'),
+    created_at: dateWithOffset(-2, '11:00:00')
+  },
+  {
+    id: 9003,
+    system_id: 'DEMO-9003',
+    item_name: 'ボルトナットセット C-9012',
+    vendor_name: '鈴木製作所',
+    color_code: '#f97316',
+    status: '移動済',
+    current_location: 'C',
+    quantity: 200,
+    scheduled_date: formatDate(new Date()),
+    received_date: formatDate(new Date()),
+    updated_at: dateWithOffset(1, '14:00:00'),
+    created_at: dateWithOffset(-3, '13:00:00')
+  },
+  {
+    id: 9004,
+    system_id: 'DEMO-9004',
+    item_name: 'ポンプ P-204',
+    vendor_name: '山田鉄工株式会社',
+    color_code: '#3b82f6',
+    status: '使用済',
+    current_location: 'D',
+    quantity: 4,
+    scheduled_date: formatDate(new Date()),
+    received_date: formatDate(new Date()),
+    updated_at: dateWithOffset(3, '08:45:00'),
+    created_at: dateWithOffset(-6, '10:00:00')
+  },
+  {
+    id: 9005,
+    system_id: 'DEMO-9005',
+    item_name: '電装品 E-7890',
+    vendor_name: '佐藤金属工業',
+    color_code: '#10b981',
+    status: '納入予定',
+    current_location: 'E',
+    quantity: 9,
+    scheduled_date: formatDate(new Date()),
+    updated_at: dateWithOffset(4, '16:00:00'),
+    created_at: dateWithOffset(-1, '16:00:00')
+  }
+];
+
+const dedupeLatestDeliveries = (sourceDeliveries) => {
+  const latestById = new Map();
+
+  sourceDeliveries.forEach((delivery) => {
+    const key = delivery.id || delivery.system_id || `${getVendorName(delivery)}-${getItemName(delivery)}`;
+    const currentDate = new Date(deliveryUpdatedDate(delivery) || 0);
+    const existing = latestById.get(key);
+    const existingDate = existing ? new Date(deliveryUpdatedDate(existing) || 0) : null;
+
+    if (!existing || currentDate >= existingDate) {
+      latestById.set(key, delivery);
+    }
+  });
+
+  return Array.from(latestById.values());
+};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -17,24 +172,52 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('today');
   const [loading, setLoading] = useState(true);
 
-  // 土日判定用関数
   const isWeekend = (date) => {
-    const day = new Date(date).getDay();
+    const day = date.getDay();
     return day === 0 || day === 6; // 0=日曜, 6=土曜
   };
 
-  // 祝日判定（簡易版）
   const isHoliday = (date) => {
-    const holidays = ['2024-05-03', '2024-05-04', '2024-05-05']; // ゴールデンウィーク
-    return holidays.includes(date);
+    return JAPAN_HOLIDAYS.has(formatDate(date));
   };
 
-  // 業者別色分け
-  const getVendorColor = (vendorName) => {
-    if (vendorName.includes('山田')) return '#3b82f6'; // 青
-    if (vendorName.includes('佐藤')) return '#10b981'; // 緑
-    if (vendorName.includes('鈴木')) return '#f97316'; // オレンジ
-    return '#6b7280'; // デフォルト（灰色）
+  const getVendorColor = (vendorName, fallbackColor = '#6b7280') => {
+    const override = VENDOR_COLOR_OVERRIDES.find(({ keyword }) => vendorName?.includes(keyword));
+    return override?.color || fallbackColor;
+  };
+
+  const calculateSummary = (sourceDeliveries) => {
+    const today = formatDate(new Date());
+    return {
+      scheduled_today: sourceDeliveries.filter(d => formatDate(d.scheduled_date || d.deliveryDate) === today).length,
+      not_received: sourceDeliveries.filter(d => d.status === '納入予定').length,
+      updated_today: sourceDeliveries.filter(d => formatDate(deliveryUpdatedDate(d)) === today).length
+    };
+  };
+
+  const buildCalendarEvents = (sourceDeliveries) => {
+    return dedupeLatestDeliveries(sourceDeliveries)
+      .map((delivery) => {
+        const eventDate = formatDate(deliveryUpdatedDate(delivery));
+        if (!eventDate) return null;
+
+        const vendorColor = getVendorColor(getVendorName(delivery), delivery.color_code);
+        return {
+          id: `delivery-${delivery.id || delivery.system_id}`,
+          title: `${getItemName(delivery)} ${delivery.status}`,
+          date: eventDate,
+          backgroundColor: vendorColor,
+          borderColor: vendorColor,
+          textColor: '#ffffff',
+          extendedProps: {
+            deliveryId: delivery.id,
+            status: delivery.status,
+            vendorName: getVendorName(delivery),
+            itemName: getItemName(delivery)
+          }
+        };
+      })
+      .filter(Boolean);
   };
 
   useEffect(() => {
@@ -44,67 +227,21 @@ const AdminDashboard = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      // ダミーデータを直接使用（パフォーマンス向上のため）
-      setSummary({
-        scheduled_today: dummyDeliveries.filter(d => d.status === '納入予定').length,
-        not_received: dummyDeliveries.filter(d => d.status === '納入予定').length,
-        updated_today: dummyDeliveries.filter(d => d.status === '納入済' || d.status === '移動済').length
-      });
-      setDeliveries(dummyDeliveries);
-      
-      // カレンダーイベントに変換（1納入物当たり最新の状態のみ表示）
-      const latestDeliveryStatus = {};
-      
-      // 各納入物の最新状態を取得
-      dummyDeliveries.forEach(delivery => {
-        const key = `${delivery.vendor_name}_${delivery.material_name}`;
-        if (!latestDeliveryStatus[key] || new Date(delivery.updatedAt) > new Date(latestDeliveryStatus[key].updatedAt)) {
-          latestDeliveryStatus[key] = delivery;
-        }
-      });
-      
-      // 完全に重複を排除したカレンダーイベントを作成（1納入物当たり1件のみ）
-      const uniqueEvents = [];
-      
-      // まず最新状態の納入物のみをフィルタリング
-      const latestDeliveries = Object.values(latestDeliveryStatus);
-      
-      // デバッグ用：最新状態の納入物を確認
-      console.log('Latest deliveries:', latestDeliveries);
-      
-      // 最新状態の納入物のみをカレンダーイベントに変換
-      latestDeliveries.forEach(delivery => {
-        // 日付を決定（納入物の更新日を優先）
-        const eventDate = delivery.updatedAt?.split('T')[0] || new Date().toISOString().split('T')[0];
-        
-        uniqueEvents.push({
-          title: `${delivery.material_name} - ${delivery.status}`,
-          date: eventDate,
-          backgroundColor: getVendorColor(delivery.vendor_name),
-          textColor: '#ffffff',
-          extendedProps: {
-            deliveryId: delivery.id,
-            status: delivery.status,
-            vendorName: delivery.vendor_name,
-            materialName: delivery.material_name
-          }
-        });
-      });
-      
-      // デバッグ用：最終的なカレンダーイベントを確認
-      console.log('Final calendar events:', uniqueEvents);
-      
-      setCalendarEvents(uniqueEvents);
+      const [summaryRes, deliveriesRes] = await Promise.all([
+        getDashboardSummary(),
+        getDeliveries()
+      ]);
+
+      const latestDeliveries = dedupeLatestDeliveries(deliveriesRes.data || []);
+      setSummary(summaryRes.data || calculateSummary(latestDeliveries));
+      setDeliveries(latestDeliveries);
+      setCalendarEvents(buildCalendarEvents(latestDeliveries));
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-      // エラー時もダミーデータを使用
-      setSummary({
-        scheduled_today: dummyDeliveries.filter(d => d.status === 'registered').length,
-        not_received: dummyDeliveries.filter(d => d.status === 'registered').length,
-        updated_today: dummyDeliveries.filter(d => d.status === 'processing' || d.status === 'arrived').length
-      });
-      setDeliveries(dummyDeliveries);
-      setCalendarEvents(dummyCalendarEvents);
+      const demoDeliveries = dedupeLatestDeliveries(buildDemoDeliveries());
+      setSummary(calculateSummary(demoDeliveries));
+      setDeliveries(demoDeliveries);
+      setCalendarEvents(buildCalendarEvents(demoDeliveries));
     } finally {
       setLoading(false);
     }
@@ -135,35 +272,26 @@ const AdminDashboard = () => {
     }
   };
 
-  // ステータス表示用
-  const getStatusText = (status) => {
-    switch (status) {
-      case '納入予定': return '納入予定';
-      case '納入済': return '納入済';
-      case '移動済': return '移動済';
-      case '使用済': return '使用済';
-      default: return '納入予定';
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div 
-              className="flex items-center cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors"
+            <button
+              type="button"
+              className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
               onClick={() => navigate('/')}
+              aria-label="トップへ戻る"
             >
               <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
                 <span className="text-white font-bold">DF</span>
               </div>
-              <div>
+              <div className="text-left">
                 <h1 className="text-xl font-bold text-navy-800">DockFlow</h1>
                 <p className="text-sm text-gray-500">造船部材リアルタイム管理システム</p>
               </div>
-            </div>
+            </button>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
                 {selectedUser?.name}（管理者）
@@ -235,31 +363,24 @@ const AdminDashboard = () => {
                 navigate(`/delivery/${info.event.extendedProps.deliveryId}`);
               }}
               dayCellClassNames={(dateInfo) => {
-                const date = dateInfo.date.toISOString().split('T')[0];
                 let classes = [];
                 
-                if (isWeekend(date)) {
-                  if (new Date(date).getDay() === 0) {
+                if (isWeekend(dateInfo.date)) {
+                  if (dateInfo.date.getDay() === 0) {
                     classes.push('bg-red-50'); // 日曜日は薄い赤
                   } else {
                     classes.push('bg-blue-50'); // 土曜日は薄い青
                   }
-                } else if (isHoliday(date)) {
+                } else if (isHoliday(dateInfo.date)) {
                   classes.push('bg-red-50'); // 祝日は薄い赤
                 }
                 
                 return classes;
               }}
               eventContent={(eventInfo) => {
-                const { event } = eventInfo;
-                const delivery = dummyDeliveries.find(d => d.id === event.extendedProps.deliveryId);
-                
                 return (
-                  <div className="p-1">
-                    <div className="text-xs font-semibold">{event.title}</div>
-                    {delivery && (
-                      <div className="text-xs mt-1">{getStatusText(delivery.status)}</div>
-                    )}
+                  <div className="p-1 leading-tight">
+                    <div className="text-xs font-semibold whitespace-normal">{eventInfo.event.title}</div>
                   </div>
                 );
               }}
@@ -309,10 +430,10 @@ const AdminDashboard = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: delivery.color_code }}></div>
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getVendorColor(getVendorName(delivery), delivery.color_code) }}></div>
                         <div>
-                          <p className="font-medium text-gray-900">{delivery.item_name}</p>
-                          <p className="text-sm text-gray-500">{delivery.vendor_name} - 場所: {delivery.current_location}</p>
+                          <p className="font-medium text-gray-900">{getItemName(delivery)}</p>
+                          <p className="text-sm text-gray-500">{getVendorName(delivery)} - 場所: {delivery.current_location}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4">

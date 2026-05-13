@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { getDeliveries } from '../services/api';
-import { Package, Plus, Calendar, List, LogOut } from 'lucide-react';
-import { dummyDeliveries } from '../data/dummyData';
+import { Package, Plus, List, LogOut } from 'lucide-react';
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
@@ -18,11 +17,13 @@ const VendorDashboard = () => {
   const loadMyDeliveries = async () => {
     try {
       setLoading(true);
-      // ダミーデータを直接使用（パフォーマンス向上のため）
-      setDeliveries(dummyDeliveries);
+      const response = await getDeliveries(
+        selectedUser?.vendor_id ? { vendor_id: selectedUser.vendor_id } : {}
+      );
+      setDeliveries(response.data || []);
     } catch (error) {
       console.error('Error loading deliveries:', error);
-      setDeliveries(dummyDeliveries);
+      setDeliveries([]);
     } finally {
       setLoading(false);
     }
@@ -44,15 +45,20 @@ const VendorDashboard = () => {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+              aria-label="トップへ戻る"
+            >
               <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
                 <span className="text-white font-bold">DF</span>
               </div>
-              <div>
+              <div className="text-left">
                 <h1 className="text-xl font-bold text-navy-800">DockFlow</h1>
                 <p className="text-sm text-gray-500">造船部材リアルタイム管理システム</p>
               </div>
-            </div>
+            </button>
             <button
               onClick={() => {
                 clearUser();

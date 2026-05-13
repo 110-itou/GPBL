@@ -11,17 +11,17 @@ const MapSelector = () => {
   const [mapError, setMapError] = useState(false);
 
   const locations = [
-    { id: 'A', x: 90, y: 90 },
-    { id: 'B', x: 220, y: 90 },
-    { id: 'C', x: 350, y: 90 },
-    { id: 'D', x: 480, y: 90 },
-    { id: 'E', x: 610, y: 90 },
-    { id: 'F', x: 700, y: 90 },
-    { id: 'G', x: 90, y: 220 },
-    { id: 'H', x: 220, y: 220 },
-    { id: 'I', x: 350, y: 220 },
-    { id: 'J', x: 480, y: 220 },
-    { id: 'K', x: 610, y: 220 }
+    { id: 'A', x: 84.62, y: 62.74 },
+    { id: 'B', x: 84.62, y: 43.75 },
+    { id: 'C', x: 84.62, y: 24.76 },
+    { id: 'D', x: 48.21, y: 62.74 },
+    { id: 'E', x: 48.21, y: 43.75 },
+    { id: 'F', x: 48.21, y: 24.76 },
+    { id: 'G', x: 59.5, y: 24.76 },
+    { id: 'H', x: 34.62, y: 38.56 },
+    { id: 'I', x: 24.71, y: 38.56 },
+    { id: 'J', x: 14.69, y: 38.56 },
+    { id: 'K', x: 14.69, y: 23.46 }
   ];
 
   const handleLocationSelect = (locationId) => {
@@ -55,13 +55,20 @@ const MapSelector = () => {
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
-                <span className="text-white font-bold">DF</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-navy-800">DockFlow</h1>
-                <p className="text-sm text-gray-500">造船部材リアルタイム管理システム</p>
-              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+                aria-label="トップへ戻る"
+              >
+                <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-white font-bold">DF</span>
+                </div>
+                <div className="text-left">
+                  <h1 className="text-xl font-bold text-navy-800">DockFlow</h1>
+                  <p className="text-sm text-gray-500">造船部材リアルタイム管理システム</p>
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -89,8 +96,8 @@ const MapSelector = () => {
         )}
 
         {/* Map Container */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="relative inline-block">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6">
+          <div className="relative mx-auto w-full max-w-[868px]">
             {mapError ? (
               <div className="text-red-600 text-center p-8 border-2 border-red-300 rounded-lg">
                 <p className="text-lg font-semibold mb-2">map.png が見つかりません。</p>
@@ -101,24 +108,24 @@ const MapSelector = () => {
                 <img
                   src={mapImage}
                   alt="保管場所図面"
-                  className="max-w-full h-auto"
-                  style={{ maxHeight: '400px' }}
+                  className="block w-full h-auto rounded-lg border border-gray-200"
                   onError={() => setMapError(true)}
                 />
                 
                 {/* Click Areas for A-K Locations */}
                 {locations.map((location) => (
                   <button
+                    type="button"
                     key={location.id}
                     onClick={() => handleLocationSelect(location.id)}
-                    className={`absolute w-12 h-12 rounded-lg transition-all duration-200 ${
+                    className={`absolute aspect-square w-[9.7%] rounded-none transition-all duration-200 ${
                       selectedLocation === location.id
-                        ? 'bg-blue-500 bg-opacity-50 border-4 border-blue-700 shadow-lg'
-                        : 'bg-blue-400 bg-opacity-20 hover:bg-opacity-30 border-2 border-blue-300 hover:border-blue-400'
+                        ? 'bg-blue-500 bg-opacity-35 border-4 border-blue-700 shadow-lg'
+                        : 'border-2 border-transparent hover:border-blue-500 hover:bg-blue-400 hover:bg-opacity-10'
                     }`}
                     style={{
-                      left: `${location.x}px`,
-                      top: `${location.y}px`,
+                      left: `${location.x}%`,
+                      top: `${location.y}%`,
                       transform: 'translate(-50%, -50%)'
                     }}
                     aria-label={`場所 ${location.id}`}

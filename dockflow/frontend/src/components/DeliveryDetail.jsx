@@ -4,6 +4,27 @@ import { useUser } from '../contexts/UserContext';
 import { getDeliveries, getMovementLogs, getAttachments, deleteDelivery } from '../services/api';
 import { ArrowLeft, Edit, MapPin, Trash2, Calendar, Package, FileText, Image, File, History } from 'lucide-react';
 
+const AttachmentPreview = ({ attachment }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (attachment.file_type === 'photo' && attachment.file_url && !hasError) {
+    return (
+      <img
+        src={attachment.file_url}
+        alt={attachment.file_name || '添付写真'}
+        className="w-16 h-16 object-cover rounded border border-gray-200"
+        onError={() => setHasError(true)}
+      />
+    );
+  }
+
+  return attachment.file_type === 'photo' ? (
+    <Image className="w-8 h-8 text-blue-500" />
+  ) : (
+    <FileText className="w-8 h-8 text-red-500" />
+  );
+};
+
 const DeliveryDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -111,13 +132,20 @@ const DeliveryDetail = () => {
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
-                <span className="text-white font-bold">DF</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-navy-800">DockFlow</h1>
-                <p className="text-sm text-gray-500">造船部材リアルタイム管理システム</p>
-              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="flex items-center rounded-lg p-1 pr-3 transition-colors hover:bg-gray-50"
+                aria-label="トップへ戻る"
+              >
+                <div className="w-10 h-10 bg-navy-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-white font-bold">DF</span>
+                </div>
+                <div className="text-left">
+                  <h1 className="text-xl font-bold text-navy-800">DockFlow</h1>
+                  <p className="text-sm text-gray-500">造船部材リアルタイム管理システム</p>
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -282,11 +310,7 @@ const DeliveryDetail = () => {
               {attachments.map((attachment) => (
                 <div key={attachment.id} className="border border-gray-200 rounded-lg p-3">
                   <div className="flex items-center space-x-3">
-                    {attachment.file_type === 'photo' ? (
-                      <Image className="w-8 h-8 text-blue-500" />
-                    ) : (
-                      <FileText className="w-8 h-8 text-red-500" />
-                    )}
+                    <AttachmentPreview attachment={attachment} />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {attachment.file_name}
